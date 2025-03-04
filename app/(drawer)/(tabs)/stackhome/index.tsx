@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, SafeAreaView, Vibration } from "react-native"
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, SafeAreaView, Animated, Easing } from "react-native"
 import { router, useNavigation } from "expo-router";
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from "@expo/vector-icons"
 import { Provider as PaperProvider, Searchbar } from "react-native-paper"
@@ -35,9 +35,31 @@ export default function App() {
   const [name, setName] = React.useState("")
   const [hour, setHour] = React.useState(0)
   const [doctor, setDoctor] = React.useState<Doctor[]>([])
+  const [loading, setLoading] = React.useState(true);
   const navigation = useNavigation();
   const defColor = '#4f0b2e'
   const { user } = useAuth();
+
+   const shimmerAnim = React.useRef(new Animated.Value(0)).current;
+
+   React.useEffect(() => {
+     Animated.loop(
+       Animated.sequence([
+         Animated.timing(shimmerAnim, {
+           toValue: 1,
+           duration: 1000,
+           easing: Easing.linear,
+           useNativeDriver: false,
+         }),
+         Animated.timing(shimmerAnim, {
+           toValue: 0,
+           duration: 1000,
+           easing: Easing.linear,
+           useNativeDriver: false,
+         }),
+       ])
+     ).start();
+   }, []);
   
 
   const categories = [
