@@ -42,14 +42,20 @@ export default function LoginScreen() {
         Iniciar sesión con Google
       </Button>
 
-      <Button mode="contained" icon="facebook" onPress={signInWithFacebook} style={styles.button}>
+      {/* <Button mode="contained" icon="facebook" onPress={signInWithFacebook} style={styles.button}>
         Iniciar sesión con Facebook
-      </Button>
+      </Button> */}
 
       <Text style={styles.registerText}>
         ¿No tienes cuenta?{" "}
         <Text style={styles.registerLink} onPress={() => router.replace("/register")}>
           Regístrate
+        </Text>
+      </Text>
+      <Text style={styles.passwordText}>
+        ¿Olvidaste tu contraseña?{" "}
+        <Text style={styles.registerLink} onPress={() => router.replace("/reset-password")}>
+          Recupérala
         </Text>
       </Text>
     </View>
@@ -80,6 +86,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
     fontSize: 14,
+  },
+  passwordText: {
+    textAlign: "center",
+    marginTop: 10,
+    fontSize:14
   },
   registerLink: {
     color: "#007bff",

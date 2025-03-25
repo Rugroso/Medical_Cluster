@@ -1,178 +1,119 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  Platform,
-} from "react-native";
-import * as Calendar from "expo-calendar";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { WebView } from "react-native-webview";
 import { useRoute } from "@react-navigation/native";
+import { useAuth } from "@/context/AuthContext";
+import { updateDoc, doc, Timestamp, arrayUnion } from "firebase/firestore";
+import { db } from "../../../../config/Firebase_Conf";
 
-const AppointmentScreen = () => {
+export default function App() {
   const route = useRoute();
-  const { doctorName, doctorAddress } = route.params as { doctorName: string; doctorAddress: string };
+  const { user } = useAuth();
+  const { calendly, doctorIdParam } = (route?.params as { calendly: string, doctorIdParam: string });
+  
+  const [appointmentData, setAppointmentData] = useState({ date: "", time: "", timeZone: "" });
 
-  const [patientName, setPatientName] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
-  const [calendarId, setCalendarId] = useState<string | null>(null);
+  const handleNavigationStateChange = (navState: any) => {
+    const currentUrl = navState.url;
+    console.log("Current URL:", currentUrl);
+    console.log("Doctor ID:", doctorIdParam);
+    console.log("User ID:", user?.uid);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Calendar.requestCalendarPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permiso denegado", "Se requiere acceso al calendario para agendar la cita.");
-        return;
+    if (currentUrl.includes("month") && currentUrl.includes("?")) {
+      const regex = /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2})/;
+      const match = currentUrl.match(regex);
+      if (match && match[1]) {
+        const appointmentString = match[1];
+        const parts = appointmentString.split("T");
+        if (parts.length === 2) {
+          const date = parts[0];
+          let time = "";
+          let timeZone = "";
+          if (parts[1].includes("-")) {
+            const completeTime = parts[1].split("-");
+            time = completeTime[0];
+            timeZone = `-${completeTime[1]}`;
+          } else if (parts[1].includes("+")) {
+            const completeTime = parts[1].split("+");
+            time = completeTime[0];
+            timeZone = `+${completeTime[1]}`;
+          }
+          setAppointmentData({ date, time, timeZone });
+        }
       }
-
-      const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
-      const defaultCalendar = calendars.find(cal => cal.allowsModifications);
-      if (defaultCalendar) {
-        setCalendarId(defaultCalendar.id);
-      } else {
-        Alert.alert("Error", "No se encontró un calendario válido en tu dispositivo.");
-      }
-    })();
-  }, []);
-
-  const handleScheduleAppointment = async () => {
-    if (!calendarId) {
-      Alert.alert("Error", "No se puede acceder al calendario.");
-      return;
     }
-    if (!patientName.trim()) {
-      Alert.alert("Error", "Por favor ingresa el nombre del paciente.");
-      return;
-    }
 
-    try {
-      const endDate = new Date(date.getTime() + 60 * 60 * 1000); // Duración de 1 hora
+    // Una vez que se llegue a la sección "invitees", asumimos que la cita ya fue seleccionada.
+    if (currentUrl.includes("invitees")) {
+      console.log("Fecha extraída:", appointmentData.date);
+      console.log("Hora extraída:", appointmentData.time);
+      console.log("Zona horaria extraída:", appointmentData.timeZone);
 
-      const eventId = await Calendar.createEventAsync(calendarId, {
-        title: `Cita con ${doctorName}`,
-        location: doctorAddress,
-        notes: `Paciente: ${patientName}`,
-        startDate: date,
-        endDate,
-        timeZone: "America/Mexico_City",
-        alarms: [{ relativeOffset: -30 }], // ⏰ Recordatorio 30 min antes
-      });
+      if (appointmentData.date && appointmentData.time && appointmentData.timeZone && user?.uid) {
+        const isoString = `${appointmentData.date}T${appointmentData.time}${appointmentData.timeZone}`;
+        const appointmentDate = new Date(isoString);
+        const firebaseTimestamp = Timestamp.fromDate(appointmentDate);
 
-      if (eventId) {
-        Alert.alert("Cita agendada", "Tu cita se ha agregado al calendario.");
+        // Actualizamos el documento del usuario agregando el nuevo objeto de cita al arreglo "appointments"
+        updateDoc(doc(db, "users", user.uid), {
+          appointments: arrayUnion({
+            appointment: firebaseTimestamp,
+            doctorId: doctorIdParam
+          })
+        })
+          .then(() => {
+            console.log("Datos actualizados en Firebase:", firebaseTimestamp);
+          })
+          .catch((error) => {
+            console.error("Error al actualizar en Firebase:", error);
+          });
       }
-    } catch (error) {
-      console.error("Error al agendar la cita:", error);
-      Alert.alert("Error", "No se pudo agendar la cita.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Agendar Cita</Text>
-
-      <Text style={styles.label}>Nombre del Paciente</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ingresa el nombre"
-        value={patientName}
-        onChangeText={setPatientName}
-      />
-
-      <Text style={styles.label}>Fecha y Hora</Text>
-      <TouchableOpacity
-        style={styles.datePickerButton}
-        onPress={() => setShowPicker(true)}
-      >
-        <Text style={styles.datePickerText}>{date.toLocaleString()}</Text>
-      </TouchableOpacity>
-
-      {showPicker && (
-        <DateTimePicker
-          value={date}
-          mode="datetime"
-          display={Platform.OS === "ios" ? "spinner" : "default"}
-          minimumDate={new Date()} // 📅 No permite fechas pasadas
-          onChange={(event:any, selectedDate:any) => {
-            setShowPicker(false);
-            if (selectedDate) {
-              setDate(selectedDate);
-            }
-          }}
-        />
+      {calendly === "sin-cita" ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <Text style={styles.infoTitle}>Sin Cita</Text>
+          <Text>No hay una cita programada en este momento.</Text>
+        </View>
+      ) : (
+        <>
+          <WebView
+            style={styles.webview}
+            source={{ uri: calendly }}
+            onNavigationStateChange={handleNavigationStateChange}
+          />
+          {appointmentData.date !== "" && appointmentData.time !== "" && (
+            <View style={styles.infoContainer}>
+              <Text style={styles.infoTitle}>Datos de la cita:</Text>
+              <Text>Fecha: {appointmentData.date}</Text>
+              <Text>Hora: {appointmentData.time}</Text>
+              <Text>Zona horaria: {appointmentData.timeZone}</Text>
+            </View>
+          )}
+        </>
       )}
-
-      <TouchableOpacity style={styles.button} onPress={handleScheduleAppointment}>
-        <Text style={styles.buttonText}>Confirmar Cita</Text>
-      </TouchableOpacity>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "#F9FAFB",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#111827",
-    marginBottom: 20,
+  webview: {
+    flex: 1,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#6B7280",
-    alignSelf: "flex-start",
-    marginBottom: 5,
+  infoContainer: {
+    padding: 10,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderColor: "#ddd",
   },
-  input: {
-    width: "100%",
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: "#FFFFFF",
-    marginBottom: 20,
-  },
-  datePickerButton: {
-    width: "100%",
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 8,
-    backgroundColor: "#FFFFFF",
-    marginBottom: 20,
-  },
-  datePickerText: {
-    fontSize: 16,
-    color: "#111827",
-  },
-  button: {
-    backgroundColor: "#4f0c2e",
-    borderRadius: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 16,
+  infoTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
-
-export default AppointmentScreen;

@@ -15,17 +15,17 @@ const MedCard = (props: cardComponents) => {
     return (
 
             <View style={styles.container}>
-                <Card style={ props.isOpen ? {...styles.restaurantCard} : {...styles.restaurantCard, backgroundColor: "rgba(0, 0, 0, 0.1)"}}>
+                <Card style={ props.isOpen ? {...styles.doctorCard} : {...styles.doctorCard, backgroundColor: "rgba(0, 0, 0, 0.1)"}}>
                     <Card.Cover
                         source={{
                             uri: props.image,
                         }}
-                        style={ props.isOpen ? {...styles.restaurantImage } : {...styles.restaurantImage, backgroundColor: "rgba(0, 0, 0, 0.1)"}}
+                        style={ props.isOpen ? {...styles.doctorImage } : {...styles.doctorImage, backgroundColor: "rgba(0, 0, 0, 0.1)"}}
                     />
-                    <Card.Content style={styles.restaurantContent}>
-                        <Text style={styles.restaurantName}>{props.name}</Text>
-                        <Text style={styles.restaurantType}>{props.description}</Text>
-                        <View style={styles.restaurantInfo}>
+                    <Card.Content style={styles.doctorContent}>
+                        <Text style={styles.doctorName}>{props.name}</Text>
+                        <Text style={styles.doctorType}>{props.description}</Text>
+                        <View style={styles.doctorInfo}>
                             <View style={styles.infoItem}>
                                 <MaterialCommunityIcons name="star" size={16} color="#FF6B2C" />
                                 <Text style={styles.infoText}>{props.rating}</Text>
@@ -47,29 +47,29 @@ const styles = StyleSheet.create({
     container: {
         width:"100%",
       }, 
-    restaurantCard: {
+    doctorCard: {
         elevation: 2,
         width: "100%",
         height: 330,
     },
-    restaurantImage: {
+    doctorImage: {
         height: 170,
     },
-    restaurantContent: {
+    doctorContent: {
         padding: 16,
     },
-    restaurantName: {
+    doctorName: {
         fontSize: 18,
         fontWeight: "600",
         color: "#1a1a1a",
         marginBottom: 4,
     },
-    restaurantType: {
+    doctorType: {
         fontSize: 14,
         color: "#666",
         marginBottom: 12,
     },
-    restaurantInfo: {
+    doctorInfo: {
         flexDirection: "column",
         gap: 16,
     },

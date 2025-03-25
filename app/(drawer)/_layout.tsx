@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { signOut } from "firebase/auth";
 import { useAuth } from "../../context/AuthContext"; 
 import * as Haptics from 'expo-haptics';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Layout() {
   return (
@@ -40,7 +41,7 @@ function CustomDrawerContent() {
         onPress={handleLogout}
         style={({ pressed }) => [styles.logoutButton, pressed ? styles.logoutButtonPressed : {}]}
       >
-        <LogOut size={20} color="white" />
+        <MaterialCommunityIcons name='logout' size={20} color="white" />
         <Text style={styles.logoutText}>Cerrar Sesión</Text>
       </Pressable>
     </View>

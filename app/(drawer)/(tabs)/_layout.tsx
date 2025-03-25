@@ -13,8 +13,8 @@ export default function TabLayout() {
     <Tabs
       initialRouteName="stackhome"
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarStyle: { backgroundColor: '#131414' },
+        tabBarActiveTintColor: '#4f0b2e',
+        tabBarStyle: { backgroundColor: '#fff' },
         headerShown: false,
         tabBarHideOnKeyboard: false,
       }}
@@ -27,7 +27,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="stackhome"
         options={{
-          title: 'Home',
+          title: 'Inicio',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
           ),
@@ -48,6 +48,16 @@ export default function TabLayout() {
           title: 'Mi Perfil',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="stackdoctor"
+        options={{
+          href:null,
+          title: 'Test Doctor',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon  name={focused ? 'person' : 'person-outline'} color={color} />
           ),
         }}
       />
