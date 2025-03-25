@@ -14,11 +14,11 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [cellphone, setCellphone] = useState("");
-  const [age, setAge] = useState("");
+  const [birthdate, setbirthdate] = useState("");
+  const [location, setLocation] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [open, setOpen] = useState(false);
-  const [gender, setGender] = useState(null);
+  const [gender, setGender] = useState("");
   const [items, setItems] = useState([
     { label: "Masculino", value: "Masculito" },
     { label: "Femenino", value: "Femenino" },
@@ -28,7 +28,6 @@ export default function RegisterScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Registro</Text>
-
       <TextInput
         label="Correo Electrónico"
         value={email}
@@ -70,8 +69,8 @@ export default function RegisterScreen() {
 
       <TextInput
         label="Edad"
-        value={age}
-        onChangeText={setAge}
+        value={birthdate}
+        onChangeText={setbirthdate}
         mode="outlined"
         style={styles.input}
       />
@@ -86,6 +85,14 @@ export default function RegisterScreen() {
         placeholder="Selecciona tu género"
         style={styles.dropdown}
         dropDownContainerStyle={styles.dropdownContainer}
+      />
+
+      <TextInput
+        label="Ubicación"
+        value={location}
+        onChangeText={setLocation}
+        mode="outlined"
+        style={styles.input}
       />
 
       <TextInput
@@ -111,7 +118,7 @@ export default function RegisterScreen() {
       <Button
         mode="contained"
         onPress={() => {
-          register(email, password, confirmPassword, name, lastName);
+          register(email, password, confirmPassword, name, lastName, birthdate, gender, location);
         }}
         loading={loading}
         disabled={loading}

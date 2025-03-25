@@ -8,6 +8,14 @@ import "../global.css";
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { AuthProvider } from "../context/AuthContext";
 import { Provider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { KeyboardAvoidingView, Platform } from 'react-native';
+
+
+SplashScreen.setOptions({
+  duration: 500,
+  fade: true,
+});
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,7 +23,8 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  }); 
+
 
   useEffect(() => {
     if (loaded) {
@@ -28,6 +37,7 @@ export default function RootLayout() {
   }
 
   return (
+    <SafeAreaProvider>
         <AuthProvider>
           <Provider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
@@ -63,5 +73,6 @@ export default function RootLayout() {
           </ThemeProvider>
           </Provider>
         </AuthProvider>
+      </SafeAreaProvider>
   );
 }
