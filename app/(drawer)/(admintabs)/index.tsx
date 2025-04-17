@@ -7,7 +7,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Image,
   SafeAreaView,
   ActivityIndicator,
   RefreshControl,
@@ -18,11 +17,12 @@ import { db } from "../../../config/Firebase_Conf"
 import { collection, query, getDocs } from "firebase/firestore"
 import * as Haptics from "expo-haptics"
 import { useAuth } from "@/context/AuthContext"
+import { Feather } from "@expo/vector-icons"
+
 
 interface DashboardStats {
   totalDoctors: number
-  activeDoctors: number
-  pendingApprovals: number
+
   totalCategories: number
 }
 
@@ -31,8 +31,6 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false)
   const [stats, setStats] = useState<DashboardStats>({
     totalDoctors: 0,
-    activeDoctors: 0,
-    pendingApprovals: 0,
     totalCategories: 5,
   })
   const [adminName, setAdminName] = useState("Administrador")
@@ -56,8 +54,6 @@ export default function AdminDashboard() {
 
       setStats({
         totalDoctors: totalDocs,
-        activeDoctors: activeDocs,
-        pendingApprovals: 3,
         totalCategories: 5,
       })
 
@@ -116,9 +112,6 @@ export default function AdminDashboard() {
               <Text style={styles.adminName}>{adminName}</Text>
               <Text style={styles.roleText}>Administrador</Text>
             </View>
-            <TouchableOpacity style={styles.profileButton} onPress={() => handleNavigate("/(admin)/profile")}>
-              <Image source={{ uri: "" }} style={styles.profileImage} />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -150,6 +143,20 @@ export default function AdminDashboard() {
                 </View>
                 <Text style={styles.actionCardTitle}>Gestionar Doctores</Text>
                 <Text style={styles.actionCardDescription}>Añadir, editar o eliminar doctores del directorio</Text>
+              </View>
+              <MaterialIcons name="arrow-forward" size={24} color="#fff" style={styles.actionCardArrow} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionCard, styles.primaryActionCard]}
+              onPress={() => handleNavigate("/(drawer)/(admintabs)/notifications")}
+            >
+              <View style={styles.actionCardContent}>
+                <View style={styles.actionIconContainer}>
+                  <Feather name="send" size={28} color="#fff" />
+                </View>
+                <Text style={styles.actionCardTitle}>Enviar Notificaciones</Text>
+                <Text style={styles.actionCardDescription}>Enviar notificaciones a todos los usuarios de la app</Text>
               </View>
               <MaterialIcons name="arrow-forward" size={24} color="#fff" style={styles.actionCardArrow} />
             </TouchableOpacity>
@@ -202,9 +209,10 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 24,
   },
   headerContent: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "flex-start",
+    width: "100%",
   },
   welcomeText: {
     fontSize: 16,
@@ -220,6 +228,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#f9e6ee",
     marginTop: 4,
+    textAlign: "right",
+    width : "100%"
   },
   profileButton: {
     position: "relative",

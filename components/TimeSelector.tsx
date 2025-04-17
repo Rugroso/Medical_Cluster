@@ -19,7 +19,6 @@ export default function TimeSelector({ value, onChange, label = "Horario" }: Tim
   const [selectedMode, setSelectedMode] = useState<"start" | "end">("start")
   const [showIosPicker, setShowIosPicker] = useState(false)
 
-  // Parse initial value on mount
   React.useEffect(() => {
     if (value) {
       try {
@@ -45,7 +44,6 @@ export default function TimeSelector({ value, onChange, label = "Horario" }: Tim
         }
       } catch (error) {
         console.error("Error parsing time:", error)
-        // Set default times if parsing fails
         const defaultStart = new Date()
         defaultStart.setHours(8, 0, 0, 0)
 

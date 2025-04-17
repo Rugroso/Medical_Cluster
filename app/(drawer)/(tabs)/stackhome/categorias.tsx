@@ -14,28 +14,28 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from "expo-haptics";
 
 const categories = [
-  { id: '1', title: 'Anestesiología', icon: 'bed', path: './especialidades/anestesiologia' },
-  { id: '2', title: 'Cardiología', icon: 'heart', path: './especialidades/cardiologia' },
-  { id: '3', title: 'Cirugía General', icon: 'doctor', path: './especialidades/cirugia-general' },
-  { id: '4', title: 'Dermatología', icon: 'brush', path: './especialidades/dermatologia' },
-  { id: '5', title: 'Endocrinología', icon: 'flask', path: './especialidades/endocrinologia' },
-  { id: '6', title: 'Gastroenterología', icon: 'stomach', path: './especialidades/gastroenterologia' },
-  { id: '7', title: 'Ginecología y Obstetricia', icon: 'human-female', path: './especialidades/ginecologia-obstetricia' },
-  { id: '8', title: 'Hematología', icon: 'water', path: './especialidades/hematologia' },
-  { id: '9', title: 'Infectología', icon: 'virus', path: './especialidades/infectologia' },
-  { id: '10', title: 'Nefrología', icon: 'water-outline', path: './especialidades/nefrologia' },
-  { id: '11', title: 'Neumología', icon: 'lungs', path: './especialidades/neumologia' },
-  { id: '12', title: 'Neurología', icon: 'brain', path: './especialidades/neurologia' },
-  { id: '13', title: 'Odontología', icon: 'tooth', path: './especialidades/odontologia' },
-  { id: '14', title: 'Oftalmología', icon: 'eye', path: './especialidades/oftalmologia' },
-  { id: '15', title: 'Oncología', icon: 'alert-circle', path: './especialidades/oncologia' },
-  { id: '16', title: 'Ortopedia', icon: 'seat-legroom-normal', path: './especialidades/ortopedia' },
-  { id: '17', title: 'Pediatría', icon: 'human-child', path: './especialidades/pediatria' },
-  { id: '18', title: 'Psicología', icon: 'chat', path: './especialidades/psicología' },
-  { id: '19', title: 'Psiquiatría', icon: 'pill', path: './especialidades/psiquiatria' },
-  { id: '20', title: 'Radiología', icon: 'radioactive-circle', path: './especialidades/radiologia' },
-  { id: '21', title: 'Reumatología', icon: 'bone', path: './especialidades/reumatologia' },
-  { id: '22', title: 'Urología', icon: 'water', path: './especialidades/urologia' },
+  { id: '1', title: 'Anestesiología', icon: 'bed', path: './especialidades/anestesiologia', params: 'Anestesiología' },
+  { id: '2', title: 'Cardiología', icon: 'heart', path: './especialidades/cardiologia', params: 'Cardiología' },
+  { id: '3', title: 'Cirugía General', icon: 'doctor', path: './especialidades/cirugia-general', params: 'Cirugía General' },
+  { id: '4', title: 'Dermatología', icon: 'brush', path: './especialidades/dermatologia', params: 'Dermatología' },
+  { id: '5', title: 'Endocrinología', icon: 'flask', path: './especialidades/endocrinologia', params: 'Endocrinología' },
+  { id: '6', title: 'Gastroenterología', icon: 'stomach', path: './especialidades/gastroenterologia', params: 'Gastroenterología' },
+  { id: '7', title: 'Ginecología y Obstetricia', icon: 'human-female', path: './especialidades/ginecologia-obstetricia', params: 'Ginecología y Obstetricia' },
+  { id: '8', title: 'Hematología', icon: 'water', path: './especialidades/hematologia', params: 'Hematología' },
+  { id: '9', title: 'Infectología', icon: 'virus', path: './especialidades/infectologia', params: 'Infectología' },
+  { id: '10', title: 'Nefrología', icon: 'water-outline', path: './especialidades/nefrologia', params: 'Nefrología' },
+  { id: '11', title: 'Neumología', icon: 'lungs', path: './especialidades/neumologia', params: 'Neumología' },
+  { id: '12', title: 'Neurología', icon: 'brain', path: './especialidades/neurologia', params: 'Neurología' },
+  { id: '13', title: 'Odontología', icon: 'tooth', path: './especialidades/odontologia', params: 'Odontología' },
+  { id: '14', title: 'Oftalmología', icon: 'eye', path: './especialidades/oftalmologia', params: 'Oftalmología' },
+  { id: '15', title: 'Oncología', icon: 'alert-circle', path: './especialidades/oncologia', params: 'Oncología' },
+  { id: '16', title: 'Ortopedia', icon: 'seat-legroom-normal', path: './especialidades/ortopedia', params: 'Ortopedia' },
+  { id: '17', title: 'Pediatría', icon: 'human-child', path: './especialidades/pediatria', params: 'Pediatría' },
+  { id: '18', title: 'Psicología', icon: 'chat', path: './especialidades/psicología', params: 'Psicología' },
+  { id: '19', title: 'Psiquiatría', icon: 'pill', path: './especialidades/psiquiatria', params: 'Psiquiatría' },
+  { id: '20', title: 'Radiología', icon: 'radioactive-circle', path: './especialidades/radiologia', params: 'Radiología' },
+  { id: '21', title: 'Reumatología', icon: 'bone', path: './especialidades/reumatologia', params: 'Reumatología' },
+  { id: '22', title: 'Urología', icon: 'water', path: './especialidades/urologia', params: 'Urología' },
 ];
 const defColor = '#4f0b2e'
 
@@ -43,10 +43,9 @@ const defColor = '#4f0b2e'
 export default function App() {
   const router = useRouter();
 
-  const handleNavigation = (path: string) => { 
+  const handleNavigation = (path: string, params:string) => { 
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    
-    router.push(path as any)
+    router.push({pathname:'/(drawer)/(tabs)/stackhome/categorias/medicos', params: {specialty: params}});
   }
   
   return (
@@ -59,7 +58,7 @@ export default function App() {
             </ImageBackground>
             <View style={styles.categoriesContainer}>
                 {categories.map((item) => (
-                <TouchableOpacity key={item.id} style={styles.categoryButton} onPress={() => handleNavigation(item.path)}>
+                <TouchableOpacity key={item.id} style={styles.categoryButton} onPress={() => handleNavigation(item.path, item.params)}>
                     <MaterialCommunityIcons name={item.icon as any} size={32} color={defColor} style={styles.categoryIcon} />
                     <Text style={styles.categoryText}>{item.title}</Text>
                 </TouchableOpacity>
@@ -88,7 +87,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around', 
     alignContent: 'flex-start', 
     padding: 10,
-    marginBottom:'-160%'
+    marginBottom:'-170%'
   },
   header: {
     backgroundColor: '#E0E0E0',

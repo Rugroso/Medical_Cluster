@@ -120,12 +120,11 @@ export default function DoctorsScreen() {
   };
 
   useEffect(() => {
-    if (specialty) {
+    if (specialty!=='noparams') {
       setFilterBySpecialty(specialty);
     }
   }, [specialty]);
 
-  // Consulta la colección "users" para obtener el array de favoritos del usuario actual.
   const getUserFavorites = async () => {
     try {
       const currentUser = auth.currentUser;

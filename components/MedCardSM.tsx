@@ -38,7 +38,7 @@ const MedCardSM = (props: cardComponents) => {
             <View style={styles.doctorInfo}>
               <View style={styles.infoItem}>
                 <MaterialCommunityIcons name="star" size={16} color="#FF6B2C" />
-                {props.rating === 0 ? <Text style={styles.infoText}>Nuevo</Text> : <Text style={styles.infoText}>{props.rating}</Text>}
+                {props.rating === 0 ? <Text style={styles.infoText}>Nuevo</Text> : <Text style={styles.infoText}>{props.rating.toFixed(1)}</Text>}
               </View>
               <View style={styles.infoItem}>
                 <MaterialCommunityIcons name="clock-outline" size={16} color="#666" />
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   doctorCard: {
     elevation: 2,
     width: "100%",
-    height: 110, 
+    height: 120, 
   },
   cardContent: {
     flexDirection: "row", 
@@ -69,10 +69,10 @@ const styles = StyleSheet.create({
 
   },
   doctorImage: {
-    width: 110,
-    height: 110,
-    borderTopStartRadius: 12,
-    borderBottomStartRadius: 12,
+    width: 120,
+    height: 120,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
   },
   doctorContent: {
     flex: 1,

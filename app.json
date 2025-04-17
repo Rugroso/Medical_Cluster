@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.abrahamsl.Medical-Cluster-SLRC"
     },
     "android": {
@@ -43,6 +43,10 @@
       "eas": {
         "projectId": "e722e5ea-f1ca-4693-b483-f89b87d683a9"
       }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/e722e5ea-f1ca-4693-b483-f89b87d683a9"
     }
   }
 }

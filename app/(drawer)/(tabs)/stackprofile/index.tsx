@@ -7,20 +7,22 @@ import {
   Image,
   RefreshControl,
   ScrollView,
-  FlatList,
-  TextInput,
+  Alert
 } from "react-native";
 import { useRouter } from "expo-router";
 import { FontAwesome5, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { db } from "../../../../config/Firebase_Conf";
 import { useAuth } from "@/context/AuthContext";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, updateDoc, doc} from "firebase/firestore";
 import * as Haptics from "expo-haptics";
 import MedCardSM from "@/components/MedCardSM";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import * as ImagePicker from "expo-image-picker"
+import { storage } from "../../../../config/Firebase_Conf"
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 
 interface User {
-  id: string;
+  userId: string;
   name: string;
   lastName: string;
   email: string;
@@ -285,6 +287,72 @@ export default function ProfileScreen() {
     }
   }, []);
 
+    const pickImage = async () => {
+      let resultSucceed = false;
+      let newProfilePicture = ''
+      try {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.3,
+        })
+        
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+          resultSucceed = true;
+          newProfilePicture = result.assets[0].uri
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+        }
+      } catch (error) {
+        console.error("Error picking image:", error)
+        Alert.alert("Error", "No se pudo seleccionar la imagen")
+      }
+
+      if (resultSucceed === true) {
+
+        const response = fetch(newProfilePicture)
+        
+        const blob = await (await response).blob()
+
+        const imageName = `users/${userData?.userId}.jpg`
+        const storageRef = ref(storage, imageName)
+
+        const uploadTask = uploadBytesResumable(storageRef, blob)
+        let imageUrl:string = ''
+        console.log(imageName)
+        
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+              console.log(`Upload is ${progress}% done`)
+            },
+            (error) => {
+              console.error("Error uploading image:", error)
+              reject(error)
+            },
+            async () => {
+              imageUrl = await getDownloadURL(uploadTask.snapshot.ref)
+              console.log("Image uploaded, URL:", imageUrl)
+              setProfilePicture (imageUrl)
+              Alert.alert("Foto de Perfil", "La foto de Perfil ha sido actualizada con éxito")
+              resolve(null)
+            },
+          )
+        })
+      const userProfilePicture = {
+        profilePicture: imageUrl
+      }
+      if (user?.uid) {
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, userProfilePicture);
+      } else {
+        console.error("User ID is undefined");
+      }
+      }
+    }
+
   const renderSectionContent = () => {
     switch (activeSection) {
       case "favorites":
@@ -341,6 +409,8 @@ export default function ProfileScreen() {
                 </TouchableOpacity>
               )}
             </View>
+            <Text style={{ fontSize: 16, color:'gray', marginBottom:12, marginTop:-8}}>Si deseas cancelar una cita, haz una llamada con el doctor</Text>
+
             <View style={styles.contentContainer}>
               {appointments.length === 0 ? (
                 <View style={styles.emptyState}>
@@ -425,13 +495,21 @@ export default function ProfileScreen() {
     >
       <View style={styles.container}>
         <View style={styles.profileHeader}>
-          <View style={styles.profileImageContainer}>
-            {profilePicture === "" ? (
-              <FontAwesome5 name="user-circle" size={100} color="#333" />
-            ) : (
-              <Image source={{ uri: profilePicture }} style={styles.profileImage} />
-            )}
-          </View>
+          <TouchableOpacity onPress={pickImage}>
+            <View style={{ position: "absolute", bottom: 5, right: -10, zIndex: 10, backgroundColor: "#FFF", borderRadius: 50, padding: 5 }}>
+              <MaterialCommunityIcons name="pencil" size={25} color={defColor} />
+            </View>
+            <View>
+              <View style={styles.profileImageContainer}>
+                {profilePicture === "" ? (
+                  <FontAwesome5 name="user-circle" size={100} color="#333" />
+                ) : (
+                  <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+                )}
+              </View>
+            </View>
+          </TouchableOpacity>
+
           <Text style={styles.username}>
             {name} {lastName}
           </Text>
@@ -441,6 +519,12 @@ export default function ProfileScreen() {
               <Text style={styles.location}>{location}</Text>
             </View>
           )}
+            <TouchableOpacity onPress={() => router.push("/(drawer)/(tabs)/stackprofile/editprofile")}>
+              <View style={{ borderRadius: 8, padding: 10, flexDirection: "row", alignItems: "center", justifyContent:'flex-start' ,marginBottom: -20 }}>
+                <MaterialCommunityIcons name="account-edit" size={20} color={defColor} />
+                <Text style={styles.filterButtonText}>Editar Perfil</Text>
+              </View>
+            </TouchableOpacity>
         </View>
         <View style={styles.statsContainer}>
           <TouchableOpacity
@@ -766,5 +850,3 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 });
-
-export { ProfileScreen };

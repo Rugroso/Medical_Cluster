@@ -26,11 +26,15 @@ yarn-debug.*
 yarn-error.*
 
 # Firebase
-config/
+
 
 # macOS
 .DS_Store
 *.pem
+
+# iOS
+# ios/GoogleService-Info.plist
+
 
 # local env files
 .env*.local

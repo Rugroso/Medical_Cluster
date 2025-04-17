@@ -23,9 +23,10 @@ import { storage } from "../../../../config/Firebase_Conf"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { db } from "../../../../config/Firebase_Conf"
-import { v4 as uuidv4 } from "uuid"
 import { SaveFormat, useImageManipulator } from "expo-image-manipulator"
 import { MultipleSelectList } from "react-native-dropdown-select-list"
+import TimeSelector from "@/components/TimeSelector"
+
 
 
 
@@ -56,6 +57,12 @@ export default function EditDoctor() {
   const [newService, setNewService] = useState("")
   const [newTag, setNewTag] = useState("")
   const [originalSpecialties, setOriginalSpecialties] = useState<string[]>([])
+  const [facebook, setFacebook] = useState('')
+  const [instagram, setInstagram] = useState('')
+  const [x , setX] = useState ('')
+  const [tiktok, setTiktok] = useState('')
+  const [website, SetWebsite] = useState('')
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null)
   const context = useImageManipulator(image || '');
   
 
@@ -108,6 +115,12 @@ const dataSpecialties = [
           setLongitude(doctorData.longitude || -114.768663592)
           setGallery(doctorData.gallery || [])
           setCalendly(doctorData.calendly || '')
+          setBackgroundImage(doctorData.backgroundImage || null)
+          setFacebook(doctorData.facebook || '')
+          setInstagram(doctorData.instagram || '')
+          setX(doctorData.x || '')
+          setTiktok(doctorData.tiktok || '')
+          SetWebsite(doctorData.website || '')
 
           if (doctorData.image) {
             setImage(doctorData.image)
@@ -118,7 +131,6 @@ const dataSpecialties = [
           router.back()
         }
       } catch (error) {
-        console.error("Error fetching doctor data:", error)
         Alert.alert("Error", "No se pudieron cargar los datos del doctor")
         router.back()
       } finally {
@@ -139,13 +151,6 @@ const dataSpecialties = [
     }
   }
 
-  const handleRemoveSpecialty = (index: number) => {
-    const updatedSpecialties = [...specialties]
-    updatedSpecialties.splice(index, 1)
-    setSpecialties(updatedSpecialties)
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-  }
-
   const handleAddService = () => {
     if (newService.trim()) {
       setServices([...services, newService.trim()])
@@ -154,9 +159,23 @@ const dataSpecialties = [
     }
   }
 
-  useEffect(() => {
-    console.log(specialties)
-  },[specialties])
+    const pickBackgroundImage = async () => {
+      try {
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.5,
+        })
+  
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+          setBackgroundImage(result.assets[0].uri)
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+        }
+      } catch (error) {
+        Alert.alert("Error", "No se pudo seleccionar la imagen")
+      }
+    }
 
   const handleRemoveService = (index: number) => {
     const updatedServices = [...services]
@@ -194,7 +213,6 @@ const dataSpecialties = [
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
       }
     } catch (error) {
-      console.error("Error picking image:", error)
       Alert.alert("Error", "No se pudo seleccionar la imagen")
     }
   }
@@ -223,7 +241,6 @@ const dataSpecialties = [
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
         }
       } catch (error) {
-        console.error("Error picking image:", error)
         Alert.alert("Error", "No se pudo seleccionar la imagen")
       }
     }
@@ -235,7 +252,7 @@ const dataSpecialties = [
     await Promise.all(gallery.map(async (uri, index) => {
     const response = fetch(uri)
     const blob = await (await response).blob()
-    const imageName = `doctors/${uuidv4()}_gallery${index}.jpg`
+    const imageName = `doctors/${name}_gallery${index}.jpg`
     const storageRef = ref(storage, imageName)
     const uploadTask = uploadBytesResumable(storageRef, blob)
     return new Promise((resolve, reject) => {
@@ -243,15 +260,12 @@ const dataSpecialties = [
         "state_changed",
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          console.log(`Upload is ${progress}% done`)
         },
         (error) => {
-          console.error("Error uploading image:", error)
           reject(error)
         },
         async () => {
           const imageUrl = await getDownloadURL(uploadTask.snapshot.ref)
-          console.log("Image uploaded, URL:", imageUrl)
           galleryUrls.push(imageUrl)
           resolve(null)
         },
@@ -316,7 +330,7 @@ const dataSpecialties = [
         
         const blob = await (await response).blob()
 
-        const imageName = `doctors/${uuidv4()}.jpg`
+        const imageName = `doctors/${name}.jpg`
         const storageRef = ref(storage, imageName)
 
         const uploadTask = uploadBytesResumable(storageRef, blob)
@@ -326,15 +340,12 @@ const dataSpecialties = [
             "state_changed",
             (snapshot) => {
               const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-              console.log(`Upload is ${progress}% done`)
             },
             (error) => {
-              console.error("Error uploading image:", error)
               reject(error)
             },
             async () => {
               imageUrl = await getDownloadURL(uploadTask.snapshot.ref)
-              console.log("Image uploaded, URL:", imageUrl)
               resolve(null)
             },
           )
@@ -359,6 +370,12 @@ const dataSpecialties = [
         longitude,
         gallery: galleryUrls,
         calendly,
+        facebook,
+        instagram,
+        x,
+        tiktok,
+        website,
+        backgroundImage,
         updatedAt: new Date(),
       }
 
@@ -373,7 +390,6 @@ const dataSpecialties = [
         },
       ])
     } catch (error) {
-      console.error("Error updating doctor:", error)
       setSubmitting(false)
       Alert.alert("Error", "No se pudo actualizar el doctor")
     }
@@ -416,7 +432,14 @@ const dataSpecialties = [
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Nombre del Doctor</Text>
-              <TextInput style={styles.input} placeholder="Dr. Juan Pérez" value={name} onChangeText={setName} />
+              <TextInput 
+              style={styles.input} 
+              placeholder="Dr. Juan Pérez" 
+              value={name} 
+              placeholderTextColor={"#999"}
+              onChangeText={(text) => setName(text.slice(0, 30))}
+              />
+              <Text style={{color:'gray', marginTop:8}}>{name.length}/30</Text>
             </View>
 
             <View style={styles.inputGroup}>
@@ -425,8 +448,10 @@ const dataSpecialties = [
                 style={styles.input}
                 placeholder="Cardiólogo especialista en..."
                 value={description}
-                onChangeText={setDescription}
+                placeholderTextColor={"#999"}
+                onChangeText={(text) => setDescription(text.slice(0, 40))}
               />
+            <Text style={{color:'gray', marginTop:8}}>{description.length}/200</Text>
             </View>
 
             <View style={styles.inputGroup}>
@@ -435,11 +460,12 @@ const dataSpecialties = [
                 style={[styles.input, styles.textArea]}
                 placeholder="Información detallada sobre el doctor..."
                 value={completeDescription}
-                onChangeText={setCompleteDescription}
+                onChangeText={(text) => setCompleteDescription(text.slice(0, 40))}
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
               />
+              <Text style={{color:'gray', marginTop:8}}>{completeDescription.length}/200</Text>
             </View>
 
             <View style={styles.inputGroup}>
@@ -456,7 +482,6 @@ const dataSpecialties = [
                 dropdownStyles={{ width: 350 }}
                 maxHeight={300}
                 searchPlaceholder="Buscar Especialidad"
-                onSelect={() => console.log('Specialty selected')}
               />
               <Text style = {{marginBottom:8, color:'black'}}>Especialidades previamente seleccionadas:</Text>
               <View style={{flexDirection: 'column', flexWrap: 'wrap'}}>
@@ -482,14 +507,13 @@ const dataSpecialties = [
                       setAddress(data.description)
                       setLatitude(details.geometry.location.lat)
                       setLongitude(details.geometry.location.lng)
-                      console.log("Coordinates:", details.geometry.location)
-                      console.log("Address:", data.description)
+
                     } else {
                       setAddress(data.description)
                     }
                   }}
                   query={{
-                    key: "AIzaSyByOcLdvb_LXz8Yak0RO8BkXAeo-hPu1EA",
+                    key:  process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
                     language: "es",
                   }}
                   styles={{
@@ -552,24 +576,78 @@ const dataSpecialties = [
                 placeholder="123-456-7890"
                 value={phone}
                 onChangeText={setPhone}
+                placeholderTextColor={"#999"}
                 keyboardType="phone-pad"
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>URL de Calendly</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="https://calendly.com/drjuanperez/consulta"
-                value={calendly}
-                onChangeText={setCalendly}
-              />
-            </View>
+             <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Facebook</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="https://www.facebook.com/medico"
+                  value={facebook}
+                  placeholderTextColor={"#999"}
+                  onChangeText={setFacebook}
+                />
+              </View>
+  
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Instagram</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="https://www.instagram.com/medico"
+                  value={instagram}
+                  placeholderTextColor={"#999"}
+                  onChangeText={setInstagram}
+                />
+              </View>
+  
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>X (Twitter)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="https://x.com/medico"
+                  value={x}
+                  placeholderTextColor={"#999"}
+                  onChangeText={setX}
+                />
+              </View>
+  
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>TitTok</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="https://www.tiktok.com/medico"
+                  value={tiktok}
+                  placeholderTextColor={"#999"}
+                  onChangeText={setTiktok}
+                />
+              </View>
+  
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Página Web</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="https://www.medico.com"
+                  value={website}
+                  placeholderTextColor={"#999"}
+                  onChangeText={SetWebsite}
+                />
+              </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Horario</Text>
-              <TextInput style={styles.input} placeholder="8:00AM-5:00PM" value={opening} onChangeText={setOpening} />
-            </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>URL de Calendly</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="https://calendly.com/drjuanperez/consulta"
+                  value={calendly}
+                  placeholderTextColor={"#999"}
+                  onChangeText={setCalendly}
+                />
+              </View>
+
+            <TimeSelector value={opening} onChange={setOpening} label="Horario" />
           </View>
 
           <View style={styles.formSection}>
@@ -613,6 +691,37 @@ const dataSpecialties = [
           </View>
 
           <View style={styles.formSection}>
+              <Text style={styles.sectionTitle}>Foto de Portada</Text>
+  
+              <View style={styles.tagInputContainer}>
+                <View>
+                  {backgroundImage ? (
+                    <View>
+                      <View style={{ position: "absolute", top: 6, right: 12, zIndex: 1 }}>
+                        <TouchableOpacity onPress={() => setBackgroundImage('')}>
+                          <View style={{ borderRadius: 60, backgroundColor: "#f5f5f5", justifyContent: "center", alignItems: "center", width: 22, height: 22}}>
+                              <Feather name="x" size={16} color={'gray'}></Feather>
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                      <Image source={{ uri: backgroundImage }} style={styles.galleryPlacholder} />
+                    </View>
+                  ) : (
+                    <View>
+                      <TouchableOpacity onPress={pickBackgroundImage}>
+                        <View style={styles.galleryPlacholder}>
+                          <Feather name="image" size={32} color="#999" />
+                          <Text style={styles.imagePlaceholderText}>Agregar foto</Text>
+                        </View>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  
+                </View>
+              </View>
+            </View>
+
+          <View style={styles.formSection}>
             <Text style={styles.sectionTitle}>Servicios</Text>
 
             <View style={styles.tagInputContainer}>
@@ -620,6 +729,7 @@ const dataSpecialties = [
                 style={styles.tagInput}
                 placeholder="Agregar servicio"
                 value={newService}
+                placeholderTextColor={"#999"}
                 onChangeText={setNewService}
               />
               <TouchableOpacity style={styles.addTagButton} onPress={handleAddService}>
@@ -643,7 +753,13 @@ const dataSpecialties = [
             <Text style={styles.sectionTitle}>Tags</Text>
 
             <View style={styles.tagInputContainer}>
-              <TextInput style={styles.tagInput} placeholder="Agregar tag" value={newTag} onChangeText={setNewTag} />
+              <TextInput 
+              style={styles.tagInput} 
+              placeholder="Agregar tag" 
+              value={newTag} 
+              placeholderTextColor={"#999"}
+              onChangeText={setNewTag} 
+              />
               <TouchableOpacity style={styles.addTagButton} onPress={handleAddTag}>
                 <Feather name="plus" size={20} color="#fff" />
               </TouchableOpacity>

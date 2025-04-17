@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
+import * as Notifications from "expo-notifications";
 import { WebView } from "react-native-webview";
 import { useRoute } from "@react-navigation/native";
 import { useAuth } from "@/context/AuthContext";
@@ -12,6 +13,31 @@ export default function App() {
   const { calendly, doctorIdParam } = (route?.params as { calendly: string, doctorIdParam: string });
   
   const [appointmentData, setAppointmentData] = useState({ date: "", time: "", timeZone: "" });
+
+  async function scheduleNotificationAsync(appointmentDate: Date) {
+    const now = new Date();
+    const oneHourBefore = new Date(appointmentDate.getTime() - 60 * 60 * 1000);
+    const diffInSeconds = Math.floor((oneHourBefore.getTime() - now.getTime()) / 1000);
+  
+    if (diffInSeconds <= 0) {
+      console.warn("La notificación no se puede programar: falta menos de una hora.");
+      return;
+    }
+  
+    const identifier = await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Cita programada',
+        body: `Tu cita con el doctor ${doctorIdParam} comenzará en una hora.`,
+        sound: 'default',
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        seconds: diffInSeconds,
+        repeats: false,
+      },
+    });
+  
+  }
 
   const handleNavigationStateChange = (navState: any) => {
     const currentUrl = navState.url;
@@ -43,7 +69,6 @@ export default function App() {
       }
     }
 
-    // Una vez que se llegue a la sección "invitees", asumimos que la cita ya fue seleccionada.
     if (currentUrl.includes("invitees")) {
       console.log("Fecha extraída:", appointmentData.date);
       console.log("Hora extraída:", appointmentData.time);
@@ -53,8 +78,7 @@ export default function App() {
         const isoString = `${appointmentData.date}T${appointmentData.time}${appointmentData.timeZone}`;
         const appointmentDate = new Date(isoString);
         const firebaseTimestamp = Timestamp.fromDate(appointmentDate);
-
-        // Actualizamos el documento del usuario agregando el nuevo objeto de cita al arreglo "appointments"
+      
         updateDoc(doc(db, "users", user.uid), {
           appointments: arrayUnion({
             appointment: firebaseTimestamp,
@@ -62,6 +86,20 @@ export default function App() {
           })
         })
           .then(() => {
+            Alert.alert(
+              "Cita programada",
+              "Se ha programado una cita con éxito. ¿Quieres recibir un recordatorio una hora antes?",
+              [
+                {
+                  text: "No",
+                  style: "cancel"
+                },
+                {
+                  text: "Sí",
+                  onPress: () => scheduleNotificationAsync(appointmentDate)
+                }
+              ]
+            );
             console.log("Datos actualizados en Firebase:", firebaseTimestamp);
           })
           .catch((error) => {
@@ -70,6 +108,9 @@ export default function App() {
       }
     }
   };
+
+
+  
 
   return (
     <View style={styles.container}>
@@ -85,14 +126,6 @@ export default function App() {
             source={{ uri: calendly }}
             onNavigationStateChange={handleNavigationStateChange}
           />
-          {appointmentData.date !== "" && appointmentData.time !== "" && (
-            <View style={styles.infoContainer}>
-              <Text style={styles.infoTitle}>Datos de la cita:</Text>
-              <Text>Fecha: {appointmentData.date}</Text>
-              <Text>Hora: {appointmentData.time}</Text>
-              <Text>Zona horaria: {appointmentData.timeZone}</Text>
-            </View>
-          )}
         </>
       )}
     </View>

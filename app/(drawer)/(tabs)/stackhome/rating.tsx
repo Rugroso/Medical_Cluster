@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+"use client"
+
+import { useState, useEffect } from "react"
 import {
   View,
   StyleSheet,
@@ -9,148 +11,172 @@ import {
   Platform,
   ScrollView,
   RefreshControl,
-  ActivityIndicator
-} from "react-native";
-import { Text, TextInput, Button } from "react-native-paper";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  doc,
-  arrayUnion,
-  getDoc
-} from "firebase/firestore";
-import { db } from "../../../../config/Firebase_Conf";
-import { useAuth } from "../../../../context/AuthContext";
-import { useRoute } from "@react-navigation/native";
+  ActivityIndicator,
+} from "react-native"
+import { Text, TextInput, Button } from "react-native-paper"
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"
+import { collection, query, where, getDocs, updateDoc, doc, arrayUnion, getDoc, arrayRemove } from "firebase/firestore"
+import { db } from "../../../../config/Firebase_Conf"
+import { useAuth } from "@/context/AuthContext"
+import { useLocalSearchParams, useRouter } from "expo-router"
 
 interface Doctor {
-  doctorId: string;
-  name: string;
-  description: string;
-  rating: number;
-  address: string;
-  completeDescription: string;
-  opening: string;
-  tags: string[];
-  isOpen: boolean;
-  openingFormat: string;
-  services: string[];
-  phone: string;
-  image: string;
-  facebook: string;
-  instagram: string;
-  tiktok: string;
-  youtube: string;
-  x: string;
-  website: string;
-  gallery: string[];
-  ratings?: Rating[];
+  doctorId: string
+  name: string
+  description: string
+  rating: number
+  address: string
+  completeDescription: string
+  opening: string
+  tags: string[]
+  isOpen: boolean
+  openingFormat: string
+  services: string[]
+  phone: string
+  image: string
+  facebook: string
+  instagram: string
+  tiktok: string
+  youtube: string
+  x: string
+  website: string
+  gallery: string[]
+  ratings?: Rating[]
 }
 
-
 interface Rating {
-  userId: string;
-  rating: number;
-  comment: string;
-  userName?: string;
-  createdAt?: string;
+  userId: string
+  rating: number
+  comment: string
+  userName?: string
+  createdAt?: string
 }
 
 export default function RatingScreen() {
-  const route = useRoute();
-  const { user } = useAuth();
-  const [doctor, setDoctor] = useState<Doctor | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [loadingRatings, setLoadingRatings] = useState(false);
-  const [refreshing, setRefreshing] = useState(false); 
+  const params = useLocalSearchParams()
+  const router = useRouter()
+  const { user } = useAuth()
+  const [doctor, setDoctor] = useState<Doctor | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [loadingRatings, setLoadingRatings] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
 
-  const [rating, setRating] = useState<number>(0);
-  const [comment, setComment] = useState<string>("");
+  const [rating, setRating] = useState<number>(0)
+  const [comment, setComment] = useState<string>("")
+  const [isEditing, setIsEditing] = useState<boolean>(false)
+  const [existingRating, setExistingRating] = useState<Rating | null>(null)
 
-  const { doctorIdParam } = route.params as { doctorIdParam: string };
+  const doctorIdParam = params.doctorIdParam as string
 
   useEffect(() => {
-    getDoctorById(doctorIdParam);
-  }, [doctorIdParam]);
+    getDoctorById(doctorIdParam)
+  }, [doctorIdParam])
 
   const getDoctorById = async (doctorId: string) => {
     try {
-      const q = query(collection(db, "doctors"), where("doctorId", "==", doctorId));
-      const querySnapshot = await getDocs(q);
+      const q = query(collection(db, "doctors"), where("doctorId", "==", doctorId))
+      const querySnapshot = await getDocs(q)
       if (!querySnapshot.empty) {
-        const docSnap = querySnapshot.docs[0];
-        const doctorData = docSnap.data() as Doctor;
+        const docSnap = querySnapshot.docs[0]
+        const doctorData = docSnap.data() as Doctor
 
-        const ratingsWithUserNames = await getRatingsWithUserNames(docSnap.data().ratings || []);
+        const ratingsWithUserNames = await getRatingsWithUserNames(docSnap.data().ratings || [])
 
         setDoctor({
           ...doctorData,
           ratings: ratingsWithUserNames,
-        });
+        })
+
+        if (user && ratingsWithUserNames.length > 0) {
+          const userRating = ratingsWithUserNames.find((r) => r.userId === user.uid)
+          if (userRating) {
+            setExistingRating(userRating)
+            setRating(userRating.rating)
+            setComment(userRating.comment)
+            setIsEditing(true)
+          }
+        }
       }
     } catch (error) {
-      console.error("Error obteniendo el doctor:", error);
+      console.error("Error obteniendo el doctor:", error)
     }
-  };
+  }
 
   const onRefresh = async () => {
-    setRefreshing(true);
-    await getDoctorById(doctorIdParam);
-    setRefreshing(false);
-  };
+    setRefreshing(true)
+    await getDoctorById(doctorIdParam)
+    setRefreshing(false)
+  }
 
   const getRatingsWithUserNames = async (ratings: Rating[]): Promise<Rating[]> => {
-    setLoadingRatings(true);
+    setLoadingRatings(true)
     try {
       const enrichedRatings = await Promise.all(
         ratings.map(async (ratingObj) => {
           try {
-            const userDoc = await getDoc(doc(db, "users", ratingObj.userId));
-            const userData = userDoc.exists() ? userDoc.data() : null;
+            const userDoc = await getDoc(doc(db, "users", ratingObj.userId))
+            const userData = userDoc.exists() ? userDoc.data() : null
             return {
               ...ratingObj,
               userName: userData ? `${userData.name} ${userData.lastName}` : "Usuario desconocido",
-            };
+            }
           } catch (error) {
-            console.error("Error fetching user for rating:", error);
+            console.error("Error fetching user for rating:", error)
             return {
               ...ratingObj,
               userName: "Usuario desconocido",
-            };
+            }
           }
-        })
-      );
-      return enrichedRatings;
+        }),
+      )
+      return enrichedRatings
     } catch (error) {
-      console.error("Error enriqueciendo ratings:", error);
-      return ratings;
+      console.error("Error enriqueciendo ratings:", error)
+      return ratings
     } finally {
-      setLoadingRatings(false);
+      setLoadingRatings(false)
     }
-  };
+  }
 
   const handleRatingSubmit = async () => {
     if (!user || !doctor) {
-      Alert.alert("Error", "Usuario o doctor no encontrados.");
-      return;
+      Alert.alert("Error", "Usuario o doctor no encontrados.")
+      return
     }
-  
+
     if (rating < 1 || rating > 5) {
-      Alert.alert("Calificación requerida", "Selecciona un número de estrellas (mínimo 1).");
-      return;
+      Alert.alert("Calificación requerida", "Selecciona un número de estrellas (mínimo 1).")
+      return
     }
-  
-    setLoading(true);
-  
-    const timestamp = new Date().toISOString();
-  
+
+    setLoading(true)
+
+    const timestamp = new Date().toISOString()
+
     try {
-      const userRef = doc(db, "users", user.uid);
-  
+      const userRef = doc(db, "users", user.uid)
+      const doctorRef = doc(db, "doctors", doctor.doctorId)
+
+      if (isEditing && existingRating) {
+        await updateDoc(userRef, {
+          ratings: arrayRemove({
+            doctorId: doctor.doctorId,
+            rating: existingRating.rating,
+            comment: existingRating.comment,
+            createdAt: existingRating.createdAt,
+          }),
+        })
+
+        await updateDoc(doctorRef, {
+          ratings: arrayRemove({
+            userId: user.uid,
+            rating: existingRating.rating,
+            comment: existingRating.comment,
+            createdAt: existingRating.createdAt,
+          }),
+        })
+      }
+
       await updateDoc(userRef, {
         ratings: arrayUnion({
           doctorId: doctor.doctorId,
@@ -158,10 +184,8 @@ export default function RatingScreen() {
           comment: comment,
           createdAt: timestamp,
         }),
-      });
-  
-      const doctorRef = doc(db, "doctors", doctor.doctorId);
-  
+      })
+
       await updateDoc(doctorRef, {
         ratings: arrayUnion({
           userId: user.uid,
@@ -169,23 +193,29 @@ export default function RatingScreen() {
           comment: comment,
           createdAt: timestamp,
         }),
-      });
-  
-      Alert.alert("Éxito", "Tu reseña se ha enviado.");
-      setRating(0);
-      setComment("");
-  
-      getDoctorById(doctor.doctorId);
+      })
+
+      Alert.alert("Éxito", isEditing ? "Tu reseña se ha actualizado." : "Tu reseña se ha enviado.")
+
+      setExistingRating({
+        userId: user.uid,
+        rating: rating,
+        comment: comment,
+        createdAt: timestamp,
+      })
+      setIsEditing(true)
+
+      getDoctorById(doctor.doctorId)
     } catch (error) {
-      console.error("Error al enviar la reseña:", error);
-      Alert.alert("Error", "No se pudo enviar tu reseña.");
+      console.error("Error al enviar la reseña:", error)
+      Alert.alert("Error", "No se pudo enviar tu reseña.")
     }
-  
-    setLoading(false);
-  };
+
+    setLoading(false)
+  }
 
   const renderStars = (value: number) => {
-    const stars = [];
+    const stars = []
     for (let index = 1; index <= 5; index++) {
       stars.push(
         <Icon
@@ -194,25 +224,25 @@ export default function RatingScreen() {
           size={20}
           color="#FF6B2C"
           style={{ marginHorizontal: 1 }}
-        />
-      );
+        />,
+      )
     }
-    return <View style={{ flexDirection: "row" }}>{stars}</View>;
-  };
+    return <View style={{ flexDirection: "row" }}>{stars}</View>
+  }
 
   const renderDate = (dateString?: string) => {
-    if (!dateString) return null;
+    if (!dateString) return null
 
-    const date = new Date(dateString);
-    const formattedDate = date.toLocaleDateString();
-    const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const date = new Date(dateString)
+    const formattedDate = date.toLocaleDateString()
+    const formattedTime = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
 
     return (
       <Text style={styles.reviewDate}>
         {formattedDate} - {formattedTime}
       </Text>
-    );
-  };
+    )
+  }
 
   return (
     <KeyboardAvoidingView
@@ -222,23 +252,24 @@ export default function RatingScreen() {
     >
       <ScrollView
         contentContainerStyle={styles.container}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#4f0c2e"]} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={["#4f0c2e"]} />}
       >
-        <Text style={styles.title}>Da una opinión sobre tu médico</Text>
+        <Text style={styles.title}>{isEditing ? "Edita tu opinión" : "Da una opinión sobre tu médico"}</Text>
 
         {doctor ? (
           <>
             <View style={styles.imageContainer}>
-              <Image
-                source={{ uri: doctor.image }}
-                style={styles.doctorImage}
-                resizeMode="cover"
-              />
+              <Image source={{ uri: doctor.image }} style={styles.doctorImage} resizeMode="cover" />
             </View>
 
             <Text style={styles.subtitle}>{doctor.name}</Text>
+
+            {isEditing && (
+              <View style={styles.editingBanner}>
+                <Icon name="pencil-circle" size={24} color="#4f0c2e" />
+                <Text style={styles.editingText}>Estás editando tu reseña anterior</Text>
+              </View>
+            )}
 
             <Text style={styles.label}>Selecciona tu calificación:</Text>
             <View style={styles.starsContainer}>
@@ -257,11 +288,19 @@ export default function RatingScreen() {
             <TextInput
               label="Escribe tu reseña"
               value={comment}
-              onChangeText={setComment}
+              selectionColor="#4f0c2e"
+              underlineColor="#4f0c2e"
+              activeUnderlineColor="#4f0c2e"
+              activeOutlineColor="#4f0c2e"
+              outlineColor="#4f0c2e"
+              onChangeText={(text) => setComment(text.slice(0, 100))}
               mode="outlined"
               multiline
               style={styles.input}
+              placeholder="Comparte tu experiencia con este doctor..."
+              placeholderTextColor="#666"
             />
+            <Text style={{ textAlign: "left", color: "#666" }}>{comment.length}/100</Text>
 
             <Button
               mode="contained"
@@ -270,15 +309,13 @@ export default function RatingScreen() {
               disabled={loading}
               style={styles.button}
             >
-              Enviar Reseña
+              {isEditing ? "Actualizar Reseña" : "Enviar Reseña"}
             </Button>
 
             <View style={styles.reviewsContainer}>
               <View style={styles.reviewsHeader}>
-                <Text style={styles.reviewsTitle}>Reseñas de otros pacientes  </Text>
-                <Text style={styles.reviewTitleNumber}>
-                  ({doctor?.ratings?.length ?? 0})
-                </Text>
+                <Text style={styles.reviewsTitle}>Reseñas de otros pacientes </Text>
+                <Text style={styles.reviewTitleNumber}>({doctor?.ratings?.length ?? 0})</Text>
               </View>
 
               {loadingRatings ? (
@@ -287,8 +324,10 @@ export default function RatingScreen() {
                 <ScrollView style={styles.reviewsScroll} nestedScrollEnabled={true}>
                   {doctor.ratings && doctor.ratings.length > 0 ? (
                     doctor.ratings.map((item, index) => (
-                      <View key={index} style={styles.reviewCard}>
-                        <Text style={styles.reviewUser}>{item.userName}</Text>
+                      <View key={index} style={[styles.reviewCard, item.userId === user?.uid && styles.userReviewCard]}>
+                        <Text style={styles.reviewUser}>
+                          {item.userName} {item.userId === user?.uid && "(Tú)"}
+                        </Text>
                         <View style={styles.reviewRating}>{renderStars(item.rating)}</View>
                         <Text style={styles.reviewComment}>{item.comment}</Text>
                         {renderDate(item.createdAt)}
@@ -306,7 +345,7 @@ export default function RatingScreen() {
         )}
       </ScrollView>
     </KeyboardAvoidingView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -338,6 +377,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
+  editingBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f9e6ee",
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  editingText: {
+    marginLeft: 8,
+    color: "#4f0c2e",
+    fontWeight: "500",
+  },
   label: {
     fontSize: 16,
     marginBottom: 10,
@@ -349,9 +402,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    marginBottom: 16,
+    marginBottom: 8,
     borderColor: "#f4ced4",
-    backgroundColor: "#fffbfe",
+    backgroundColor: "#fff",
   },
   button: {
     marginTop: 10,
@@ -393,6 +446,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#f4ced4",
   },
+  userReviewCard: {
+    borderColor: "#4f0c2e",
+    borderWidth: 2,
+    backgroundColor: "#f9f5f7",
+  },
   reviewUser: {
     fontWeight: "bold",
     fontSize: 16,
@@ -415,4 +473,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#888",
   },
-});
+})
+

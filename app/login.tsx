@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Alert, StyleSheet } from "react-native";
+import { View, StyleSheet, Image} from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "expo-router";
@@ -13,24 +13,45 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
+      <View>
+          <Image
+            source={require("../assets/images/logo/medicalclus.png")}
+            style={{ width: 80, height: 80, alignSelf: "center", marginBottom: 15 }}
+            resizeMode="contain"
+          />
+      </View>
       <Text style={styles.title}>Iniciar Sesión</Text>
 
       <TextInput
         label="Correo Electrónico"
+        selectionColor="#4f0c2e"
+        underlineColor="#4f0c2e"
+        activeUnderlineColor="#4f0c2e"
+        activeOutlineColor="#4f0c2e"
+        outlineColor="#4f0c2e"
         value={email}
         onChangeText={setEmail}
         mode="outlined"
         keyboardType="email-address"
         autoCapitalize="none"
+        autoComplete="email"
         style={styles.input}
       />
 
       <TextInput
         label="Contraseña"
+        selectionColor="#4f0c2e"
+        underlineColor="#4f0c2e"
+        activeUnderlineColor="#4f0c2e"
+        activeOutlineColor="#4f0c2e"
+        outlineColor="#4f0c2e"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         mode="outlined"
+        autoCapitalize="none"
+        autoComplete="password"
+        textContentType="password"
         style={styles.input}
       />
 
@@ -77,6 +98,7 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 16,
+    backgroundColor: "#fff",
   },
   button: {
     marginTop: 10,

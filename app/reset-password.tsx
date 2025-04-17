@@ -34,6 +34,11 @@ export default function ResetPassword() {
       <TextInput
         label="Correo Electrónico"
         value={email}
+        selectionColor="#4f0c2e"
+        underlineColor="#4f0c2e"
+        activeUnderlineColor="#4f0c2e"
+        activeOutlineColor="#4f0c2e"
+        outlineColor="#4f0c2e"
         onChangeText={setEmail}
         mode="outlined"
         keyboardType="email-address"
@@ -76,9 +81,11 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 16,
+    backgroundColor: "#fff",
   },
   button: {
     marginTop: 10,
+    backgroundColor: "#4f0c2e",
   },
   loginText: {
     textAlign: "center",

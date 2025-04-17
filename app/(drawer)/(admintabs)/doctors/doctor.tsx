@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { db } from "../../../../config/Firebase_Conf";
-import { collection, query, where, getDocs, setDoc, doc, updateDoc, arrayRemove, arrayUnion, average, sum } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 import { useRoute } from "@react-navigation/native";
 import { Linking, Alert } from "react-native";
 import { useRouter } from "expo-router";
@@ -55,6 +55,8 @@ interface Doctor {
   gallery: string[];
   latitude: number;
   longitude: number;
+  calendly: string;
+  backgroundImage: string
 }
 
 interface User {
@@ -74,7 +76,8 @@ const DoctorDetailScreen = () => {
   const [openGallery, setOpenGallery] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
-  const [ratingNumbers, setRatingNumbers] = useState(0);
+  const [ratingNumbers, setRatingNumbers] = useState(0); 
+  const [openProfileModal, setOpenProfileModal] = useState(false);
   const { user } = useAuth()
 
   const shimmerAnim = useRef(new Animated.Value(0)).current;
@@ -218,19 +221,50 @@ const DoctorDetailScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <View style={styles.imageContainer}>
-          {doctor?.image ? (
-            <ImageBackground
-              source={{uri: doctor.image}}
-              style={{ width: "100%", height: 200 }}
-              resizeMode='cover'
-            />
-            ) : (
-            <View style={styles.imagePlaceholder}>
-              <Icon name="account" size={80} color="#94A3B8" />
+      <View>
+        <View style={styles.headerBackground}>
+          <Modal
+            visible={openProfileModal}
+            animationType="slide"
+            transparent={true}
+          >
+            <View style={styles.centeredView}>
+              <TouchableOpacity 
+                onPress={() => setOpenProfileModal(false)} 
+                style={styles.closeButton}
+              >
+                <Icon name="close" size={24} color="#FFF" />
+              </TouchableOpacity>
+              
+              <Image
+                source={{ uri: doctor?.image }}
+                style={{ width: '100%', height: '100%' }}
+                resizeMode="contain"
+              />
             </View>
-            ) }
+          </Modal>
+          <ImageBackground style={{width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center'}} source={
+          doctor?.backgroundImage ? { uri: doctor.backgroundImage } : require('../../../../assets/doctors/info_background.jpg')}>
+          <ImageBackground style={{backgroundColor:'rgba(0, 0, 0, 0.5)', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center'}}>
+          <View style={styles.imageWrapper}>
+            <TouchableOpacity onPress={() => setOpenProfileModal(true)} style={styles.imageWrapper}>
+              {doctor?.image ? (
+                <Image
+                  source={{ uri: doctor.image }}
+                  style={styles.profileImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.imagePlaceholder}>
+                  <Icon name="account" size={80} color="#94A3B8" />
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+          </ImageBackground>
+          </ImageBackground>
         </View>
+      </View>
 
         <View style={styles.infoContainer}>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "flex-start"}}>
@@ -407,7 +441,7 @@ const DoctorDetailScreen = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
           style={styles.appointmentButton} 
-          onPress={() => router.push('/(drawer)/(tabs)/stackhome/appointment')}
+          onPress={() => router.push({ pathname:'/(drawer)/(tabs)/stackhome/appointment', params: {calendly: doctor?.calendly || 'sin-cita', doctorIdParam: doctor?.doctorId || 'sin-id' } })}
         >
           <Text style={styles.appointmentButtonText}>Agendar cita</Text>
         </TouchableOpacity>
@@ -499,10 +533,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
-  imageContainer: {
-    position: "relative",
-    height: 200,
-  },
+
   imagePlaceholder: {
     width: "100%",
     height: 200,
@@ -682,6 +713,30 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 14,
   },
+  imageWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  profileImage: {
+    width: 130,
+    height: 130,
+    borderRadius: 75,
+    borderWidth: 2,
+    borderColor: "#fff", 
+  },
+
+  headerBackground: {
+    backgroundColor: '#dbdbdb',
+    height: 160,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileModalImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  }
+
 });
 
 export default DoctorDetailScreen;

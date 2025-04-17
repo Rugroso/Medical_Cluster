@@ -29,7 +29,6 @@ interface Doctor {
   doctorId: string
   name: string
   description: string
-  // Se elimina la propiedad "rating" y se usará "ratings" para calcularla
   ratings?: Rating[];
   image: string
   specialties?: string[]
@@ -69,7 +68,6 @@ export default function ManageDoctors() {
     }
   }
 
-  // Función auxiliar que calcula el promedio de ratings para un doctor
   const computeRating = (doctor: Doctor): number => {
     if (doctor.ratings && doctor.ratings.length > 0) {
       return parseFloat(
@@ -112,10 +110,8 @@ export default function ManageDoctors() {
         style: "destructive",
         onPress: async () => {
           try {
-            // Eliminamos el doctor de Firebase
             const doctorRef = doc(db, "doctors", doctorId)
             await deleteDoc(doctorRef)
-            // Actualizamos el estado local
             setDoctors(doctors.filter((doc) => doc.doctorId !== doctorId))
             Alert.alert("Éxito", `${doctorName} ha sido eliminado`)
           } catch (error) {
@@ -218,6 +214,8 @@ export default function ManageDoctors() {
               style={styles.searchInput}
               placeholder="Buscar doctores..."
               value={searchQuery}
+              placeholderTextColor={"#999"}
+
               onChangeText={setSearchQuery}
             />
             {searchQuery.length > 0 && (

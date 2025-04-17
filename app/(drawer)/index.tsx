@@ -18,13 +18,11 @@ export default function Index() {
           const userSnapshot = await getDoc(userDocRef);
 
           if (userSnapshot.exists()) {
-            console.log(userSnapshot.data().isAdmin)
             setIsAdmin(userSnapshot.data()?.isAdmin || false);
           } else {
             setIsAdmin(false);
           }
         } catch (error) {
-          console.error("Error al obtener rol del usuario:", error);
           setIsAdmin(false);
         }
       }
@@ -38,7 +36,7 @@ export default function Index() {
     }
   }, [user]);
 
-  if (loading || checkingRole || isAdmin == null) {
+  if (loading || checkingRole) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <ActivityIndicator size="large" color="#4f0b2e" />
@@ -52,6 +50,7 @@ export default function Index() {
     
   }
   if (isAdmin != null) {
+
     return isAdmin ? <Redirect href="/(drawer)/(admintabs)" /> : <Redirect href="/(drawer)/(tabs)/stackhome" />;
   }
 }

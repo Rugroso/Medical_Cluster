@@ -1,14 +1,14 @@
 "use client"
 
-import React, { useEffect } from "react"
-import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Animated, Easing, RefreshControl, Image } from "react-native"
-import { ScrollView } from "react-native-gesture-handler" 
+import React from "react"
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Animated, Easing, RefreshControl } from "react-native"
+import { ScrollView } from "react-native-gesture-handler"
 import { router, useNavigation } from "expo-router"
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from "@expo/vector-icons"
 import { Searchbar } from "react-native-paper"
 import { useAuth } from "@/context/AuthContext"
 import { db } from "../../../../config/Firebase_Conf"
-import { collection, query, where, getDocs, doc } from "firebase/firestore"
+import { collection, query, where, getDocs } from "firebase/firestore"
 import * as Haptics from "expo-haptics"
 import MedCardSM from "@/components/MedCardSM"
 import { KeyboardAvoidingView, Platform } from "react-native"
@@ -30,15 +30,15 @@ interface Doctor {
   tags: string[]
   isOpen: boolean
   openingFormat: string
+  specialties: string[]
   ratings: {
     comment: string
     createdAt: string
     rating: number
-    userId:string
+    userId: string
   }[]
   image: string
 }
-
 
 export default function App() {
   const [searchQuery, setSearchQuery] = React.useState("")
@@ -71,17 +71,87 @@ export default function App() {
   }, [])
 
   const categories = [
-    { id: '1', title: 'Cardiología', icon: 'heart', path: './especialidades/cardiologia', type: "MaterialCommunityIcons", params: 'Cardiología' },
-    { id: '4', title: 'Odontologia', icon: 'tooth', path: './especialidades/gastroenterologia', type: "MaterialCommunityIcons", params: 'Odontología' },
-    { id: '8', title: 'Neumología', icon: 'lungs', path: './especialidades/neumologia', type: "MaterialCommunityIcons", params: 'Neumología' },
-    { id: '10', title: 'Oftalmología', icon: 'eye', path: './especialidades/oftalmologia', type: "MaterialCommunityIcons", params: 'Oftalmología'  },
-    { id: '9', title: 'Neurología', icon: 'brain', path: './especialidades/neurologia', type: "MaterialCommunityIcons",  params: 'Neurología' },
-    { id: '14', title: 'Psicología', icon: 'chat', path: './especialidades/psicología', type: "MaterialCommunityIcons", params: 'Psicología'  },
-    { id: '10', title: 'Oftalmología', icon: 'eye', path: './especialidades/oftalmologia', type: "MaterialCommunityIcons", params: 'Oftalmología' },
-    { id: '12', title: 'Ortopedia', icon: 'seat-legroom-normal', path: './especialidades/ortopedia', type: "MaterialCommunityIcons", params: 'Ortopedia' },
-    { id: '13', title: 'Pediatría', icon: 'human-child', path: './especialidades/pediatria', type: "MaterialCommunityIcons", params: 'Pediatría' },
-    { id: '19', title: 'Cirugía General', icon: 'doctor', path: './especialidades/cirugia-general', type: "MaterialCommunityIcons", params: 'Cirugía General'}
-  ];
+    {
+      id: "1",
+      title: "Cardiología",
+      icon: "heart",
+      path: "./especialidades/cardiologia",
+      type: "MaterialCommunityIcons",
+      params: "Cardiología",
+    },
+    {
+      id: "4",
+      title: "Odontologia",
+      icon: "tooth",
+      path: "./especialidades/gastroenterologia",
+      type: "MaterialCommunityIcons",
+      params: "Odontología",
+    },
+    {
+      id: "8",
+      title: "Neumología",
+      icon: "lungs",
+      path: "./especialidades/neumologia",
+      type: "MaterialCommunityIcons",
+      params: "Neumología",
+    },
+    {
+      id: "10",
+      title: "Oftalmología",
+      icon: "eye",
+      path: "./especialidades/oftalmologia",
+      type: "MaterialCommunityIcons",
+      params: "Oftalmología",
+    },
+    {
+      id: "9",
+      title: "Neurología",
+      icon: "brain",
+      path: "./especialidades/neurologia",
+      type: "MaterialCommunityIcons",
+      params: "Neurología",
+    },
+    {
+      id: "14",
+      title: "Psicología",
+      icon: "chat",
+      path: "./especialidades/psicología",
+      type: "MaterialCommunityIcons",
+      params: "Psicología",
+    },
+    {
+      id: "10",
+      title: "Oftalmología",
+      icon: "eye",
+      path: "./especialidades/oftalmologia",
+      type: "MaterialCommunityIcons",
+      params: "Oftalmología",
+    },
+    {
+      id: "12",
+      title: "Ortopedia",
+      icon: "seat-legroom-normal",
+      path: "./especialidades/ortopedia",
+      type: "MaterialCommunityIcons",
+      params: "Ortopedia",
+    },
+    {
+      id: "13",
+      title: "Pediatría",
+      icon: "human-child",
+      path: "./especialidades/pediatria",
+      type: "MaterialCommunityIcons",
+      params: "Pediatría",
+    },
+    {
+      id: "19",
+      title: "Cirugía General",
+      icon: "doctor",
+      path: "./especialidades/cirugia-general",
+      type: "MaterialCommunityIcons",
+      params: "Cirugía General",
+    },
+  ]
 
   const getGreeting = () => {
     const hour = new Date().getHours()
@@ -98,7 +168,6 @@ export default function App() {
 
   const openDoctor = (doctorId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-    console.log("Doctor ID:", doctorId)
     router.push({ pathname: "/(drawer)/(tabs)/stackhome/doctor", params: { doctorIdParam: doctorId } })
   }
 
@@ -116,125 +185,117 @@ export default function App() {
     router.push("/(drawer)/(tabs)/stackhome/categorias")
   }
 
-  const handlePressSingleCat = (category:string, params:string) => {
+  const handlePressSingleCat = (category: string, params: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-    console.log("Category:", category)
-    console.log("Params:", params)
     router.push({ pathname: "/(drawer)/(tabs)/stackhome/categorias/medicos", params: { specialty: params } })
-    }
+  }
 
-    const getUserById = async (userId: string): Promise<User | null> => {
+  const getUserById = async (userId: string): Promise<User | null> => {
     try {
       const q = query(collection(db, "users"), where("userId", "==", userId))
       const querySnapshot = await getDocs(q)
 
       if (!querySnapshot.empty) {
-      const userData: User = {
-        ...(querySnapshot.docs[0].data() as User),
-      }
-      return userData
+        const userData: User = {
+          ...(querySnapshot.docs[0].data() as User),
+        }
+        return userData
       } else {
-      console.log("No se encontró ningún usuario con ese ID.")
-      return null
+        return null
       }
     } catch (error) {
-      console.error("Error obteniendo el usuario:", error)
       return null
     }
-    }
+  }
 
-    const getDoctors = async (): Promise<Doctor[]> => {
+  const getDoctors = async (): Promise<Doctor[]> => {
     try {
       const q = query(collection(db, "doctors"))
       const querySnapshot = await getDocs(q)
       if (!querySnapshot.empty) {
-      const doctors: Doctor[] = querySnapshot.docs.map((doc) => ({
-        ...(doc.data() as Doctor),
-      }))
-      console.log("Doctores encontrados", doctors)
-      return doctors
+        const doctors: Doctor[] = querySnapshot.docs.map((doc) => ({
+          ...(doc.data() as Doctor),
+        }))
+        return doctors
       } else {
-      console.log("No se encontró ningún doctor.")
-      return []
+        return []
       }
     } catch (error) {
-      console.error("Error obteniendo doctores:", error)
       return []
     }
-    }
+  }
 
-    const loadData = async (): Promise<void> => {
+  const loadData = async (): Promise<void> => {
     setLoading(true)
     try {
       if (user?.uid) {
-      const userData = await getUserById(user.uid)
-      if (userData) {
-        setName(userData.name)
-      }
+        const userData = await getUserById(user.uid)
+        if (userData) {
+          setName(userData.name)
+        }
       }
 
       const doctorsData = await getDoctors()
       if (doctorsData.length > 0) {
-      const updatedDoctors = doctorsData.map((doc) => {
-        const openingHours = doc.opening.split("-")
-        const formattedAm: string = getFormattedHour(openingHours[0], false)
-        const formattedPm: string = getFormattedHour(openingHours[1], true)
-        const newHour: string = formattedAm.concat(" - ", formattedPm)
-        return { ...doc, openingFormat: newHour }
-      })
-
-      const doctorsWithOpenStatus = updatedDoctors.map((doc) => {
-        const [openingTime, closingTime] = doc.openingFormat.split(" - ").map((time) => Number.parseInt(time))
-        const hour = new Date().getHours()
-        return {
-        ...doc,
-        isOpen: hour >= openingTime && hour < closingTime,
-        }
-      })
-
-      const completeDoctor = doctorsWithOpenStatus.map((doc) => {
-        let sum = 0
-        doc.ratings.map((rating) => {
-        sum = sum + rating.rating
+        const updatedDoctors = doctorsData.map((doc) => {
+          const openingHours = doc.opening.split("-")
+          const formattedAm: string = getFormattedHour(openingHours[0], false)
+          const formattedPm: string = getFormattedHour(openingHours[1], true)
+          const newHour: string = formattedAm.concat(" - ", formattedPm)
+          return { ...doc, openingFormat: newHour }
         })
-        let average = sum / doc.ratings.length
-        if (isNaN(average)) {
-        average = 0
-        }
-        return { 
-        ...doc, 
-        rating: average
-        }
-      })
 
-      setDoctor(completeDoctor)
+        const doctorsWithOpenStatus = updatedDoctors.map((doc) => {
+          const [openingTime, closingTime] = doc.openingFormat.split(" - ").map((time) => Number.parseInt(time))
+          const hour = new Date().getHours()
+          return {
+            ...doc,
+            isOpen: hour >= openingTime && hour < closingTime,
+          }
+        })
+
+        const completeDoctor = doctorsWithOpenStatus.map((doc) => {
+          let sum = 0
+          doc.ratings.map((rating) => {
+            sum = sum + rating.rating
+          })
+          let average = sum / doc.ratings.length
+          if (isNaN(average)) {
+            average = 0
+          }
+          return {
+            ...doc,
+            rating: average,
+          }
+        })
+
+        const shuffledDoctors = [...completeDoctor].sort(() => Math.random() - 0.5)
+        setDoctor(shuffledDoctors)
       }
     } catch (error) {
-      console.error("Error cargando datos:", error)
     } finally {
       setLoading(false)
     }
-    }
+  }
 
-    const onRefresh = React.useCallback(async (): Promise<void> => {
+  const onRefresh = React.useCallback(async (): Promise<void> => {
     setRefreshing(true)
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
     try {
       await loadData()
     } catch (error) {
-      console.error("Error al refrescar datos:", error)
     } finally {
       setRefreshing(false)
     }
-    }, [])
+  }, [])
 
-    React.useEffect(() => {
+  React.useEffect(() => {
     loadData()
-    }, [])
+  }, [])
 
-    const placeholderData: string = `¿Qué sientes hoy? | Doctor | Especialidad`
+  const placeholderData: string = `¿Qué sientes hoy? | Doctor | Especialidad`
 
-    const renderIcon = (icon: string, type: string): JSX.Element => {
+  const renderIcon = (icon: string, type: string): JSX.Element => {
     switch (type) {
       case "FontAwesome5":
         return <FontAwesome5 name={icon} size={24} color={defColor} />
@@ -247,9 +308,7 @@ export default function App() {
 
   const openDoctors = doctor.filter((doc) => {
     const hour = new Date().getHours()
-    const [openingTime, closingTime] = doc.openingFormat
-      .split(" - ")
-      .map((time) => Number.parseInt(time))
+    const [openingTime, closingTime] = doc.openingFormat.split(" - ").map((time) => Number.parseInt(time))
     return hour >= openingTime && hour < closingTime
   })
 
@@ -263,23 +322,21 @@ export default function App() {
               refreshing={refreshing}
               onRefresh={onRefresh}
               colors={[defColor]}
-              tintColor={defColor} 
-              title="Actualizando..." 
-              titleColor="#666" 
+              tintColor={defColor}
+              title="Actualizando..."
+              titleColor="#666"
             />
           }
         >
-          <View style={styles.header}>
-          </View>
-          <View style={{flexDirection: "row", alignItems: "center", width:'100%'}}>
+          <View style={styles.header}></View>
+          <View style={{ flexDirection: "row", alignItems: "center", width: "100%" }}>
             <Text style={styles.greeting}>
               {getGreeting()}, {name}
             </Text>
-            <View style={{alignItems: "flex-end", marginTop: -15, width:'30%'}}>
+            <View style={{ alignItems: "flex-end", marginTop: -15, width: "30%" }}>
               <Weather loading={loading} setLoading={setLoading} />
             </View>
           </View>
-
 
           <Searchbar
             placeholder={placeholderData}
@@ -300,6 +357,9 @@ export default function App() {
                     (doc) =>
                       doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                       doc.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      doc.specialties.some((specialty) =>
+                        specialty.toLowerCase().includes(searchQuery.toLowerCase()),
+                      ) ||
                       doc.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
                   )
                   .map((filteredDoctor, index) => (
@@ -321,26 +381,29 @@ export default function App() {
                     </View>
                   ))}
                 {doctor.filter(
-                    (doc) =>
-                      doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      doc.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      doc.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
-                  ).length === 0 && (
-                    <View style={{ alignItems: "center", justifyContent: "center", flex:1, width:'100%' }}>
-                      <Ionicons name="help-circle" size={80} color="#ccc" />
-                      <Text style={{flex: 1, width:'100%', textAlign:"center", fontWeight:'bold', fontSize:16}}>No se encontraron resultados</Text>
-                      <Text style={{flex: 1, width:'100%', textAlign:"center"}}>
-                        Intenta con otros filtros o términos de búsqueda
-                      </Text>
-                    </View>
-                  )}
+                  (doc) =>
+                    doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    doc.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    doc.specialties.some((specialty) => specialty.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                    doc.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())),
+                ).length === 0 && (
+                  <View style={{ alignItems: "center", justifyContent: "center", flex: 1, width: "100%" }}>
+                    <Ionicons name="help-circle" size={80} color="#ccc" />
+                    <Text style={{ flex: 1, width: "100%", textAlign: "center", fontWeight: "bold", fontSize: 16 }}>
+                      No se encontraron resultados
+                    </Text>
+                    <Text style={{ flex: 1, width: "100%", textAlign: "center" }}>
+                      Intenta con otros filtros o términos de búsqueda
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
           )}
           {searchQuery.length === 0 && (
             <View>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Categorías</Text>
+                <Text style={styles.sectionTitle}>Especialidades</Text>
                 <TouchableOpacity style={styles.seeAllButton} onPress={handlePress}>
                   <Text style={styles.seeAllText}>Ver todos</Text>
                   <MaterialCommunityIcons name="chevron-right" size={20} color="#666" />
@@ -349,7 +412,11 @@ export default function App() {
 
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll}>
                 {categories.map((category, index) => (
-                  <TouchableOpacity key={index} style={styles.categoryCard} onPress={() => handlePressSingleCat(category.path, category.params as any)}>
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.categoryCard}
+                    onPress={() => handlePressSingleCat(category.path, category.params as any)}
+                  >
                     <View style={styles.categoryIcon}>{renderIcon(category.icon, category.type)}</View>
                     <Text style={styles.categoryName}>{category.title}</Text>
                   </TouchableOpacity>
@@ -358,7 +425,10 @@ export default function App() {
 
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Consultorios Abiertos</Text>
-                <TouchableOpacity style={styles.seeAllButton} onPress={() => handlePressSingleCat('medicos', 'noparams')}>
+                <TouchableOpacity
+                  style={styles.seeAllButton}
+                  onPress={() => handlePressSingleCat("medicos", "noparams")}
+                >
                   <Text style={styles.seeAllText}>Ver todos</Text>
                   <MaterialCommunityIcons name="chevron-right" size={20} color="#666" />
                 </TouchableOpacity>
@@ -366,18 +436,8 @@ export default function App() {
 
               {loading ? (
                 <View style={styles.loadingContainer}>
-                  <Animated.View 
-                    style={[
-                      styles.loadingIndicator, 
-                      { opacity: shimmerAnim }
-                    ]} 
-                  />
-                  <Animated.View 
-                    style={[
-                      styles.loadingIndicator, 
-                      { opacity: shimmerAnim, marginTop: 12 }
-                    ]} 
-                  />
+                  <Animated.View style={[styles.loadingIndicator, { opacity: shimmerAnim }]} />
+                  <Animated.View style={[styles.loadingIndicator, { opacity: shimmerAnim, marginTop: 12 }]} />
                 </View>
               ) : openDoctors.length > 0 ? (
                 <View style={styles.medCardContainer}>
@@ -402,27 +462,26 @@ export default function App() {
                 </View>
               ) : (
                 <View style={styles.emptyStateContainer}>
-                <View style={styles.emptyStateCard}>
-                  <View style={styles.emptyStateIconContainer}>
-                    <MaterialCommunityIcons name="clock-time-eight-outline" size={50} color="#4f0b2e" />
+                  <View style={styles.emptyStateCard}>
+                    <View style={styles.emptyStateIconContainer}>
+                      <MaterialCommunityIcons name="clock-time-eight-outline" size={50} color="#4f0b2e" />
+                    </View>
+                    <Text style={styles.emptyStateTitle}>No hay consultorios abiertos</Text>
+                    <Text style={styles.emptyStateDescription}>
+                      En este momento todos los consultorios están cerrados. Puedes revisar más tarde o agendar una cita
+                      para otro día.
+                    </Text>
+
+                    <View style={styles.emptyStateActions}>
+                      <TouchableOpacity
+                        style={styles.emptyStatePrimaryButton}
+                        onPress={() => handlePressSingleCat("medicos", "noparams")}
+                      >
+                        <Text style={styles.emptyStatePrimaryButtonText}>Ver todos los médicos</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                  <Text style={styles.emptyStateTitle}>No hay consultorios abiertos</Text>
-                  <Text style={styles.emptyStateDescription}>
-                    En este momento todos los consultorios están cerrados. Puedes revisar más tarde o agendar una cita para otro día.
-                  </Text>
-                  
-                  <View style={styles.emptyStateActions}>
-                    <TouchableOpacity 
-                      style={styles.emptyStatePrimaryButton}
-                      onPress={() => handlePressSingleCat('medicos', 'noparams')}
-                    >
-                      <Text style={styles.emptyStatePrimaryButtonText}>Ver todos los médicos</Text>
-                    </TouchableOpacity>
-                    
-                  </View>
-                  
                 </View>
-              </View>
               )}
             </View>
           )}
@@ -466,7 +525,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   greeting: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "600",
     color: "#1a1a1a",
     marginBottom: 24,
