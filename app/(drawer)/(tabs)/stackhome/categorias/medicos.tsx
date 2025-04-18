@@ -363,7 +363,6 @@ export default function DoctorsScreen() {
           <AntDesign name={showFilterOptions ? "up" : "down"} size={12} color={(filterBySpecialty !== null || filterOpenOnly) ? "#FFF" : "#333"} />
         </TouchableOpacity>
 
-        {/* Botón para filtrar por Favoritos */}
         <TouchableOpacity
           style={[
             styles.filterButton,

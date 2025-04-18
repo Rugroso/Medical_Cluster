@@ -439,12 +439,17 @@ const DoctorDetailScreen = () => {
         </View>
       </ScrollView>
       <View style={styles.buttonContainer}>
+      {doctor?.calendly ? (
         <TouchableOpacity 
-          style={styles.appointmentButton} 
-          onPress={() => router.push({ pathname:'/(drawer)/(tabs)/stackhome/appointment', params: {calendly: doctor?.calendly || 'sin-cita', doctorIdParam: doctor?.doctorId || 'sin-id' } })}
-        >
-          <Text style={styles.appointmentButtonText}>Agendar cita</Text>
-        </TouchableOpacity>
+        style={styles.appointmentButton} 
+        onPress={() => router.push({ pathname:'/(drawer)/(tabs)/stackhome/appointment', params: {calendly: doctor?.calendly || 'sin-cita', doctorIdParam: doctor?.doctorId || 'sin-id' } })}
+      >
+        <Text style={styles.appointmentButtonText}>Agendar cita</Text>
+      </TouchableOpacity>
+      ) : (
+        null
+      )
+      }
 
         <TouchableOpacity 
           style={styles.callButton}

@@ -322,7 +322,7 @@ export default function RegisterScreen() {
                 pointerEvents="none"
               />
             </TouchableOpacity>
-            {/* <DatePicker
+            <DatePicker
               modal
               open={showDatePicker}
               date={birthdate}
@@ -333,7 +333,7 @@ export default function RegisterScreen() {
                 setBirthdate(date);
               }}
               onCancel={() => setShowDatePicker(false)}
-            /> */}
+            />
             <View style={{ marginTop: 16 }} />
 
             <Text style={styles.inputLabel}>Género</Text>

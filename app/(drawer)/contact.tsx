@@ -19,16 +19,6 @@ export default function ContactoScreen() {
       case 'email':
         Linking.openURL(`mailto:${value}`);
         break;
-      case 'maps':
-        const scheme = Platform.select({ ios: 'maps:0,0?q=', android: 'geo:0,0?q=' });
-        const latLng = '32.4689,-114.7742'; 
-        const label = 'Medical Cluster SLRC';
-        const url = Platform.select({
-          ios: `${scheme}${label}@${latLng}`,
-          android: `${scheme}${latLng}(${label})`
-        });
-        Linking.openURL(url || '');
-        break;
       case 'website':
         Linking.openURL(value);
         break;
@@ -44,7 +34,7 @@ export default function ContactoScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Información de Contacto</Text>
           
-          <TouchableOpacity 
+          {/* <TouchableOpacity 
             style={styles.contactItem}
             onPress={() => handleContactPress('phone', '+526535551234')}
           >
@@ -56,7 +46,7 @@ export default function ContactoScreen() {
               <Text style={styles.contactValue}>+52 (653) 555-1234</Text>
             </View>
             <MaterialCommunityIcons name="chevron-right" size={24} color="#4f0c2e" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           
           <TouchableOpacity 
             style={styles.contactItem}
@@ -86,7 +76,7 @@ export default function ContactoScreen() {
             <MaterialCommunityIcons name="chevron-right" size={24} color="#f4ced4" />
           </TouchableOpacity> */}
           
-          {/* <TouchableOpacity 
+          <TouchableOpacity 
             style={styles.contactItem}
             onPress={() => handleContactPress('website', 'https://medicalclusterslrc.com')}
           >
@@ -98,11 +88,11 @@ export default function ContactoScreen() {
               <Text style={styles.contactValue}>www.medicalclusterslrc.com</Text>
             </View>
             <MaterialCommunityIcons name="chevron-right" size={24} color="#f4ced4" />
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Horario de Atención</Text>
+          <Text style={styles.sectionTitle}>Horario de Atención (Chat)</Text>
           
           <View style={styles.scheduleContainer}>
             <View style={styles.scheduleItem}>
@@ -120,7 +110,7 @@ export default function ContactoScreen() {
           </View>
         </View>
         
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Redes Sociales</Text>
           
           <View style={styles.socialContainer}>
@@ -152,18 +142,18 @@ export default function ContactoScreen() {
               <MaterialCommunityIcons name="youtube" size={28} color="#ffffff" />
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
         
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contáctanos Directamente</Text>
           
-          <TouchableOpacity 
+          {/* <TouchableOpacity 
             style={styles.contactButton}
             onPress={() => handleContactPress('phone', '+526535551234')}
           >
             <MaterialCommunityIcons name="phone" size={20} color="#ffffff" />
             <Text style={styles.contactButtonText}>Llamar Ahora</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           
           <TouchableOpacity 
             style={[styles.contactButton, styles.emailButton]}

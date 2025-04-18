@@ -318,7 +318,7 @@ export default function RegisterAuthProviderScreen() {
                 pointerEvents="none"
               />
             </TouchableOpacity>
-            {/* <DatePicker
+            <DatePicker
               modal
               open={showDatePicker}
               date={birthdate}
@@ -329,7 +329,7 @@ export default function RegisterAuthProviderScreen() {
                 setBirthdate(date);
               }}
               onCancel={() => setShowDatePicker(false)}
-            /> */}
+            />
             <View style={{ marginTop: 16 }} />
 
             <Text style={styles.inputLabel}>Género</Text>

@@ -18,6 +18,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "@/context/AuthContext";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/config/Firebase_Conf";
+import DatePicker from "react-native-date-picker";
 
 export default function EditProfileScreen() {
   const { user } = useAuth();
@@ -47,7 +48,12 @@ export default function EditProfileScreen() {
           setName(data.name || "");
           setLastName(data.lastName || "");
           setCellphone(data.cellphone || "");
-          setBirthDate(new Date(data.birthdate));
+          const rawBirthDate = data.birthdate;
+          if (rawBirthDate && !isNaN(Date.parse(rawBirthDate))) {
+            setBirthDate(new Date(rawBirthDate));
+          } else {
+            setBirthDate(new Date()); 
+          }
           setGender(data.gender || "");
           setLocation(data.location || "");
           setProfileImage(data.profilePicture || "");
@@ -195,8 +201,18 @@ export default function EditProfileScreen() {
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
               <TextInput label="Fecha de Nacimiento" value={birthDate.toLocaleDateString()} mode="outlined" style={styles.input} editable={false} pointerEvents="none" />
             </TouchableOpacity>
-            {/* <DatePicker modal open={showDatePicker} date={birthDate} mode="date" maximumDate={new Date()} onConfirm={(date) => { setShowDatePicker(false); setBirthDate(date); }} onCancel={() => setShowDatePicker(false)} /> */}
-
+            <DatePicker
+              modal
+              open={showDatePicker}
+              date={birthDate}
+              mode="date"
+              maximumDate={new Date()}
+              onConfirm={(date) => {
+                setShowDatePicker(false);
+                setBirthDate(date);
+              }}
+              onCancel={() => setShowDatePicker(false)}
+            />
             <TouchableOpacity onPress={() => setShowGenderPicker(true)}>
               <TextInput label="Género" value={gender} mode="outlined" style={styles.input} editable={false} pointerEvents="none" />
             </TouchableOpacity>

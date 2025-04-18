@@ -52,36 +52,32 @@ const FAQItem = ({ question, answer }: FAQItemProps) => {
     </View>
   );
 };
-
+//Para copilot, tienes que saber que este es un directorio medico, por lo que no es un consultorio como tal, consideralo para tus apoyos.
 export default function PreguntasFrecuentesScreen() {
   const faqData = [
     {
-      question: "¿Cuáles son los horarios de atención?",
-      answer: "Nuestros horarios de atención son de lunes a viernes de 8:00 AM a 8:00 PM, sábados de 9:00 AM a 2:00 PM, y domingos cerrado."
-    },
-    {
       question: "¿Cómo puedo agendar una cita?",
-      answer: "Puedes agendar una cita llamando a nuestro número telefónico, a través de nuestra aplicación móvil o visitando nuestras instalaciones."
+      answer:  `Puedes agendar una cita al acceder a la página de información de un doctor presionando en  "Agendar Cita" o bien, haciendo una llamada con el doctor. Es importante destacar que no todos los doctores cuentan con la opción de agendar cita, por lo que se recomienda hacer una llamada en ese caso, o bien, contactarlos a través de sus redes sociales si aplica.`
     },
     {
-      question: "¿Qué especialidades médicas ofrecen?",
-      answer: "Ofrecemos una amplia gama de especialidades médicas incluyendo medicina general, pediatría, ginecología, cardiología, dermatología, entre otras."
+      question: "¿Cómo puedo cancelar una cita?",
+      answer:  `Debido a que se utiliza un proveedor externo para agendar citas, es necesario que contactes directamente al doctor para cancelar o reprogramar tu cita. Puedes hacerlo a través de la opción de "Llamar" en la página de información del doctor o contactándolo a través de sus redes sociales si aplica.`
     },
     {
-      question: "¿Aceptan seguros médicos?",
-      answer: "Sí, trabajamos con las principales aseguradoras. Te recomendamos verificar la cobertura específica de tu póliza antes de tu visita."
+      question: "¿Cuáles son los horarios de soporte?",
+      answer: "No existe un horario de atención particular, puedes enviar un correo a medicalcluster@gmail.com, recibiendo una respuesta entre 24 y 48 horas."
     },
     {
-      question: "¿Qué debo llevar a mi primera consulta?",
-      answer: "Para tu primera consulta, te recomendamos traer tu identificación oficial, tarjeta del seguro médico (si aplica), historial médico relevante y lista de medicamentos que estés tomando actualmente."
+      question: "¿Qué especialidades médicas están disponibles?",
+      answer: "Se encuentra disponible una gran cantidad de especialidades médicas incluyendo medicina general, pediatría, ginecología, cardiología, dermatología, entre otras. Sin embargo, se añaden nuevas especialidades en función de los registros de los doctores."
     },
     {
-      question: "¿Ofrecen servicios de emergencia?",
-      answer: "Sí, contamos con servicios de atención de urgencias durante nuestro horario de operación. Para emergencias que pongan en riesgo la vida, recomendamos acudir al servicio de emergencias más cercano."
+      question: "¿Cómo puedo dar una opinión sobre un médico?",
+      answer: "Es posible dar una opinión sobre un médico en particular al acceder a su página de información, y pulsar en donde se encuentra su rating, de modo que accedes a una página en donde puedes asignar entre 1 y 5 estrellas, además de una opinión escrita."
     },
     {
-      question: "¿Cómo puedo obtener los resultados de mis estudios?",
-      answer: "Los resultados de tus estudios estarán disponibles a través de nuestra aplicación móvil, o puedes recogerlos personalmente en nuestras instalaciones."
+      question: "¿Cómo puedo reportar un problema técnico?",
+      answer: `Si encuentras un problema técnico, puedes reportarlo enviando un correo electrónico a medicalcluster@gmail.com. o a través del chat en vivo`
     }
   ];
 
@@ -112,7 +108,7 @@ export default function PreguntasFrecuentesScreen() {
             Si tienes alguna pregunta adicional, no dudes en contactarnos directamente.
           </Text>
           <TouchableOpacity style={styles.contactButton}>
-            <MaterialCommunityIcons name="phone" size={20} color="#ffffff" />
+            <MaterialCommunityIcons name="email" size={20} color="#ffffff" />
             <Text style={styles.contactButtonText}>Contactar</Text>
           </TouchableOpacity>
         </View>
