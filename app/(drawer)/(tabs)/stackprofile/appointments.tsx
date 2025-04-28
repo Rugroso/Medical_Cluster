@@ -79,6 +79,9 @@ export default function AppointmentsScreen() {
           const appointmentPromises = userData.appointments.map(async (app: any, index: number) => {
             const dateObj = app.appointment.toDate();
             const doctorData = await getDoctorById(app.doctorId);
+            if (!doctorData) {
+              return null;
+            }
             const doctorName = doctorData ? doctorData.name : "Doctor desconocido";
             const doctorAddress = doctorData ? doctorData.address : "Dirección no disponible";
             const appointmentTime = dateObj.getTime();
@@ -102,10 +105,11 @@ export default function AppointmentsScreen() {
               status: computedStatus,
             };
           });
-          let appointmentsData = await Promise.all(appointmentPromises);
-          appointmentsData.sort((a, b) => a.timestamp - b.timestamp);
-          setAppointments(appointmentsData);
-          setFilteredAppointments(appointmentsData);
+          let appointmentData = await Promise.all(appointmentPromises);
+          const filtered = appointmentData.filter((r): r is AppointmentDisplay => r !== null);
+          filtered.sort((a, b) => a.timestamp - b.timestamp);
+          setAppointments(filtered);
+          setFilteredAppointments(filtered);
         } else {
           setAppointments([]);
           setFilteredAppointments([]);

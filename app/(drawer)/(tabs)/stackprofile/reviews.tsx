@@ -8,11 +8,13 @@ import {
   FlatList,
   RefreshControl,
   ScrollView,
+  Alert,
+  Modal,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons, AntDesign, Feather, FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons, AntDesign, Feather, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { db } from "../../../../config/Firebase_Conf";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, arrayRemove } from "firebase/firestore";
 import * as Haptics from "expo-haptics";
 import { getAuth } from "firebase/auth";
 
@@ -24,6 +26,8 @@ interface Review {
   rating: number;
   date: string;
   timestamp: number;
+  // Añadir la referencia original a la reseña para poder eliminarla
+  originalRating: any;
 }
 
 type SortOption = "dateAsc" | "dateDesc" | "ratingHigh" | "ratingLow";
@@ -65,6 +69,10 @@ export default function ReviewsScreen() {
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>(null);
   const [showRatingOptions, setShowRatingOptions] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [userDocId, setUserDocId] = useState<string | null>(null);
 
   const loadReviews = async () => {
     setLoading(true);
@@ -75,9 +83,15 @@ export default function ReviewsScreen() {
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data() as any;
+        // Guardar el ID del documento para usarlo en la eliminación
+        setUserDocId(querySnapshot.docs[0].id);
+        
         if (userData.ratings && userData.ratings.length > 0) {
           const reviewPromises = userData.ratings.map(async (ratingItem: any, index: number) => {
             const doctorData = await getDoctorById(ratingItem.doctorId);
+            if (!doctorData) {
+              return null;
+            }
             const doctorName = doctorData ? doctorData.name : "Doctor desconocido";
             const dateObj = ratingItem.createdAt ? new Date(ratingItem.createdAt) : new Date();
             return {
@@ -88,12 +102,14 @@ export default function ReviewsScreen() {
               rating: ratingItem.rating,
               date: dateObj.toLocaleDateString(),
               timestamp: dateObj.getTime(),
+              originalRating: ratingItem, // Guardar la referencia original
             };
           });
           const reviewsData = await Promise.all(reviewPromises);
-          reviewsData.sort((a, b) => a.timestamp - b.timestamp);
-          setReviews(reviewsData);
-          setFilteredReviews(reviewsData);
+          const filtered = reviewsData.filter((r): r is Review => r !== null);
+          filtered.sort((a, b) => a.timestamp - b.timestamp);
+          setReviews(filtered);
+          setFilteredReviews(filtered);
         } else {
           setReviews([]);
           setFilteredReviews([]);
@@ -213,25 +229,89 @@ export default function ReviewsScreen() {
     return <View style={{ flexDirection: "row" }}>{stars}</View>;
   };
 
+  // Función para mostrar opciones de una reseña
+  const handleReviewOptions = (review: Review) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setSelectedReview(review);
+    setShowActionModal(true);
+  };
+
+  // Función para eliminar una reseña
+  const handleDeleteReview = async () => {
+    if (!selectedReview || !auth.currentUser || !userDocId) return;
+    
+    setDeleting(true);
+    try {
+      const userDocRef = doc(db, "users", userDocId);
+      
+      // Eliminar la reseña del array de ratings
+      await updateDoc(userDocRef, {
+        ratings: arrayRemove(selectedReview.originalRating)
+      });
+      
+      // Actualizar el estado local
+      const updatedReviews = reviews.filter(
+        review => review.id !== selectedReview.id
+      );
+      setReviews(updatedReviews);
+      setFilteredReviews(updatedReviews);
+      
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Éxito", "La reseña ha sido eliminada correctamente");
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      Alert.alert("Error", "No se pudo eliminar la reseña. Inténtalo de nuevo.");
+    } finally {
+      setDeleting(false);
+      setShowActionModal(false);
+      setSelectedReview(null);
+    }
+  };
+
+  // Función para confirmar la eliminación
+  const confirmDeleteReview = () => {
+    Alert.alert(
+      "Eliminar Reseña",
+      "¿Estás seguro de que deseas eliminar esta reseña?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Eliminar", 
+          onPress: handleDeleteReview,
+          style: "destructive" 
+        }
+      ]
+    );
+  };
+
   const renderReviewCard = ({ item }: { item: Review }) => (
-    <TouchableOpacity
-      style={styles.reviewCard}
-      onPress={() =>
-        router.push({
-          pathname: "/(drawer)/(tabs)/stackprofile/doctor",
-          params: { doctorIdParam: item.doctorId },
-        })
-      }
-    >
-      <View style={styles.reviewHeader}>
-        <Text style={styles.reviewDoctorName}>{item.doctorName}</Text>
-        {renderStars(item.rating)}
-      </View>
-      <Text style={styles.reviewComment}>{item.comment}</Text>
-      <View style={styles.reviewFooter}>
-        <Text style={styles.reviewDate}>{item.date}</Text>
-      </View>
-    </TouchableOpacity>
+    <View style={styles.reviewCard}>
+      <TouchableOpacity
+        style={styles.reviewContent}
+        onPress={() =>
+          router.push({
+            pathname: "/(drawer)/(tabs)/stackprofile/doctor",
+            params: { doctorIdParam: item.doctorId },
+          })
+        }
+      >
+        <View style={styles.reviewHeader}>
+          <Text style={styles.reviewDoctorName}>{item.doctorName}</Text>
+          {renderStars(item.rating)}
+        </View>
+        <Text style={styles.reviewComment}>{item.comment}</Text>
+        <View style={styles.reviewFooter}>
+          <Text style={styles.reviewDate}>{item.date}</Text>
+        </View>
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.optionsButton}
+        onPress={() => handleReviewOptions(item)}
+      >
+        <MaterialIcons name="more-vert" size={24} color="#666" />
+      </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -378,6 +458,63 @@ export default function ReviewsScreen() {
           </View>
         }
       />
+
+      {/* Modal de acciones para la reseña */}
+      <Modal
+        transparent={true}
+        visible={showActionModal}
+        animationType="fade"
+        onRequestClose={() => setShowActionModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowActionModal(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Opciones de reseña</Text>
+              
+              <TouchableOpacity 
+                style={styles.modalOption}
+                onPress={() => {
+                  setShowActionModal(false);
+                  if (selectedReview) {
+                    router.push({
+                      pathname: "/(drawer)/(tabs)/stackprofile/doctor",
+                      params: { doctorIdParam: selectedReview.doctorId },
+                    });
+                  }
+                }}
+              >
+                <Ionicons name="person" size={22} color={defColor} />
+                <Text style={styles.modalOptionText}>Ver perfil del doctor</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalOption, styles.deleteOption]}
+                onPress={() => {
+                  setShowActionModal(false);
+                  confirmDeleteReview();
+                }}
+                disabled={deleting}
+              >
+                <MaterialIcons name="delete-outline" size={22} color="#D32F2F" />
+                <Text style={[styles.modalOptionText, styles.deleteText]}>
+                  {deleting ? "Eliminando..." : "Eliminar reseña"}
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.cancelButton}
+                onPress={() => setShowActionModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -475,6 +612,14 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
+    flexDirection: "row",
+  },
+  reviewContent: {
+    flex: 1,
+  },
+  optionsButton: {
+    justifyContent: "center",
+    paddingLeft: 10,
   },
   reviewHeader: {
     flexDirection: "row",
@@ -519,6 +664,58 @@ const styles = StyleSheet.create({
     color: "#777",
     textAlign: "center",
     marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 15,
+    overflow: "hidden",
+  },
+  modalContent: {
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  modalOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: "#333",
+    marginLeft: 12,
+  },
+  deleteOption: {
+    borderBottomWidth: 0,
+  },
+  deleteText: {
+    color: "#D32F2F",
+  },
+  cancelButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    backgroundColor: "#F5F5F5",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    color: "#4f0b2e",
+    fontWeight: "600",
   },
 });
 

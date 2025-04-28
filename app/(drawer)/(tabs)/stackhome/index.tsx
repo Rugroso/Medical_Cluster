@@ -342,6 +342,7 @@ export default function App() {
             placeholder={placeholderData}
             onChangeText={setSearchQuery}
             placeholderTextColor={"grey"}
+            selectionColor={defColor}
             value={searchQuery}
             style={styles.searchBar}
           />

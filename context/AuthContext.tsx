@@ -5,7 +5,6 @@ import {
   signOut,
   signInWithCredential,
   GoogleAuthProvider,
-  FacebookAuthProvider,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendEmailVerification,
@@ -18,7 +17,6 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 // IMPORTACIONES PARA iOS (expo-auth-session)
 import * as GoogleAuthSession from "expo-auth-session/providers/google";
-import * as FacebookAuthSession from "expo-auth-session/providers/facebook";
 
 // IMPORTACIÓN PARA ANDROID (react-native-google-signin)
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
@@ -283,14 +281,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const uId = resp.user.uid;
       const snap = await getDoc(doc(db, "users", uId));
       if (!snap.exists()) {
-        Alert.alert("Error", "Usuario no registrado en Firestore");
         setLoading(false);
         return;
       }
       const isAdmin = snap.data()?.isAdmin || false;
       router.replace(isAdmin ? "/(drawer)/(admintabs)" : "/(drawer)/(tabs)/stackhome");
     } catch (e: any) {
-      Alert.alert("Error", e.message);
+      if (e.code === "auth/user-not-found") {
+        Alert.alert("Error", "El usuario no existe");
+      }
+      else if (e.code === "auth/wrong-password") {
+        Alert.alert("Error", "La contraseña es incorrecta");
+      }
+      else if (e.code === "auth/missing-password") {
+        Alert.alert("Error", "Debes introducir una contraseña");
+      }
+      else if (e.code === "auth/invalid-email") {
+        Alert.alert("Error", "El correo electrónico no es válido");
+      }
+      else if (e.code === "auth/too-many-requests") {
+        Alert.alert("Error", "Demasiados intentos de inicio de sesión fallidos. Intenta más tarde.");
+      }
+      else if (e.code === "auth/user-disabled") {
+        Alert.alert("Error", "El usuario ha sido deshabilitado");
+      }
+      else if (e.code === "auth/operation-not-allowed") {
+        Alert.alert("Error", "El inicio de sesión con correo electrónico y contraseña no está habilitado");
+      }
+      else if (e.code === "auth/weak-password") {
+        Alert.alert("Error", "La contraseña es demasiado débil");
+      }
+      else if (e.code === "auth/invalid-credential") {
+        Alert.alert("Error", "El correo o la contraseña no son correctos");
+      }
+      else if (e.code === "auth/invalid-verification-code") {  
+        Alert.alert("Error", "El código de verificación proporcionado es inválido");
+      }
+      else if (e.code === "auth/invalid-verification-id") {
+        Alert.alert("Error", "El ID de verificación proporcionado es inválido");
+      }
+      else if (e.code === "auth/invalid-argument") {
+        Alert.alert("Error", "El argumento proporcionado es inválido");
+      } 
+      else {
+        Alert.alert("Error", e.message);
+      }
     }
     setLoading(false);
   };
@@ -300,9 +335,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
   };
 
-  // Función pendiente para Facebook o implementa tu lógica
+  // Función pendiente para Facebook
   const signInWithFacebook = async () => {
-    // Tu código para Facebook aquí, usando expo-auth-session o el SDK nativo según prefieras
+    
   };
 
   return (

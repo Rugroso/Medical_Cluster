@@ -26,9 +26,7 @@ export default function Weather({ loading, setLoading }: WeatherProps) {
         
         if (userDoc.exists() && userDoc.data().preferences) {
           const preferences = userDoc.data().preferences;
-          console.log('Preferencias del usuario:', preferences);
           if (preferences.temperatureUnit) {
-            console.log('Unidad de temperatura:', preferences.temperatureUnit);
             setTemperatureUnit(preferences.temperatureUnit);
           }
         } else {
@@ -36,7 +34,6 @@ export default function Weather({ loading, setLoading }: WeatherProps) {
         }
       }
     } catch (error) {
-      console.error('Error al cargar preferencias:', error);
     } finally {
       setLoading(false);
     }
@@ -91,14 +88,12 @@ export default function Weather({ loading, setLoading }: WeatherProps) {
         setWeatherAvailable(true);
       })
       .catch((error) => {
-        console.error("Error obteniendo el clima:", error);
         setWeatherAvailable(false);
       });
    }
 
   useEffect(() => {
     if (temperatureUnit || temperatureUnit === 'none') {
-      console.log('Unidad de temperatura:', temperatureUnit);
       fetchWeatherData();
     }
   }, [loading, temperatureUnit]);

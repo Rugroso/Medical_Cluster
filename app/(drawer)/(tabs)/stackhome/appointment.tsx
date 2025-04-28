@@ -20,7 +20,6 @@ export default function App() {
     const diffInSeconds = Math.floor((oneHourBefore.getTime() - now.getTime()) / 1000);
   
     if (diffInSeconds <= 0) {
-      console.warn("La notificación no se puede programar: falta menos de una hora.");
       return;
     }
   

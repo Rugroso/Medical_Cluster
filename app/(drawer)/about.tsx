@@ -10,13 +10,13 @@ export default function SobreNosotrosScreen() {
         <View style={styles.headerSection}>
           <View >
             <Image
-            source={require("../../assets/images/logo/medicalclus.png")}
-            style={{ width: 70, height: 70, alignSelf: "center", marginBottom: 4}}
+            source={require("../../assets/images/logo/Medical_Cluster_Logotipo_nbg.png")}
+            style={{ width: 300, height: 300, alignSelf: "center", margin:-90}}
             resizeMode="contain"
             />
           </View>
-          <Text style={styles.title}>Medical Cluster SLRC</Text>
-          <Text style={styles.subtitle}>Conectando pacientes con profesionales de la salud</Text>
+          {/* <Text style={styles.title}>Medical Cluster SLRC</Text> */}
+          {/* <Text style={styles.subtitle}>Conectando pacientes con profesionales de la salud</Text> */}
         </View>
 
         <View style={styles.section}>

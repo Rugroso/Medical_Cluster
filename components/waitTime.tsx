@@ -22,7 +22,6 @@ export default function WaitTime() {
         if (userDoc.exists() && userDoc.data().preferences) {
           const preferences = userDoc.data().preferences;
           if (preferences.crossingType) {
-            console.log('Tipo de cruce:', preferences.crossingType);
             setCrossingType(preferences.crossingType);
           }
         }          
@@ -31,7 +30,6 @@ export default function WaitTime() {
         }
       }
     } catch (error) {
-      console.error('Error al cargar preferencias:', error);
     } finally {
       setLoading(false);
     }
@@ -73,7 +71,6 @@ export default function WaitTime() {
           setLoading(false);
         })
         .catch((error) => {
-          console.error("Error obteniendo el tiempo de cruce a USA:", error);
           setTimeAvailable(false);
           setLoading(false);
         });

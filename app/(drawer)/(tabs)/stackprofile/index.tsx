@@ -249,6 +249,9 @@ export default function ProfileScreen() {
           const appointmentPromises = fetchedUserData.appointments.map(async (app: any, index: number) => {
             const dateObj = app.appointment.toDate();
             const doctorData = await getDoctorById(app.doctorId);
+            if (!doctorData) {
+              return null;
+            }
             return {
               id: index.toString(),
               doctorId: app.doctorId,
@@ -261,8 +264,9 @@ export default function ProfileScreen() {
             };
           });
           let appointmentDisplay = await Promise.all(appointmentPromises);
-          appointmentDisplay.sort((a, b) => a.timestamp - b.timestamp);
-          setAppointments(appointmentDisplay);
+          const filtered = appointmentDisplay.filter((r): r is AppointmentDisplay => r !== null);
+          filtered.sort((a, b) => a.timestamp - b.timestamp);
+          setAppointments(filtered);
         } else {
           setAppointments([]);
         }

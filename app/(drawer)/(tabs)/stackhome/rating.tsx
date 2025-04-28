@@ -19,6 +19,7 @@ import { collection, query, where, getDocs, updateDoc, doc, arrayUnion, getDoc, 
 import { db } from "../../../../config/Firebase_Conf"
 import { useAuth } from "@/context/AuthContext"
 import { useLocalSearchParams, useRouter } from "expo-router"
+import { MaterialIcons } from "@expo/vector-icons"
 
 interface Doctor {
   doctorId: string
@@ -60,6 +61,7 @@ export default function RatingScreen() {
   const [loading, setLoading] = useState(false)
   const [loadingRatings, setLoadingRatings] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const [rating, setRating] = useState<number>(0)
   const [comment, setComment] = useState<string>("")
@@ -98,7 +100,6 @@ export default function RatingScreen() {
         }
       }
     } catch (error) {
-      console.error("Error obteniendo el doctor:", error)
     }
   }
 
@@ -121,7 +122,6 @@ export default function RatingScreen() {
               userName: userData ? `${userData.name} ${userData.lastName}` : "Usuario desconocido",
             }
           } catch (error) {
-            console.error("Error fetching user for rating:", error)
             return {
               ...ratingObj,
               userName: "Usuario desconocido",
@@ -131,7 +131,6 @@ export default function RatingScreen() {
       )
       return enrichedRatings
     } catch (error) {
-      console.error("Error enriqueciendo ratings:", error)
       return ratings
     } finally {
       setLoadingRatings(false)
@@ -207,11 +206,70 @@ export default function RatingScreen() {
 
       getDoctorById(doctor.doctorId)
     } catch (error) {
-      console.error("Error al enviar la reseña:", error)
       Alert.alert("Error", "No se pudo enviar tu reseña.")
     }
 
     setLoading(false)
+  }
+
+  const handleDeleteReview = async () => {
+    if (!user || !doctor || !existingRating) {
+      Alert.alert("Error", "No se puede eliminar la reseña.")
+      return
+    }
+
+    setDeleting(true)
+
+    try {
+      const userRef = doc(db, "users", user.uid)
+      const doctorRef = doc(db, "doctors", doctor.doctorId)
+
+      await updateDoc(userRef, {
+        ratings: arrayRemove({
+          doctorId: doctor.doctorId,
+          rating: existingRating.rating,
+          comment: existingRating.comment,
+          createdAt: existingRating.createdAt,
+        }),
+      })
+
+      await updateDoc(doctorRef, {
+        ratings: arrayRemove({
+          userId: user.uid,
+          rating: existingRating.rating,
+          comment: existingRating.comment,
+          createdAt: existingRating.createdAt,
+        }),
+      })
+
+      Alert.alert("Éxito", "Tu reseña ha sido eliminada.")
+      
+      setRating(0)
+      setComment("")
+      setIsEditing(false)
+      setExistingRating(null)
+      
+      getDoctorById(doctor.doctorId)
+    } catch (error) {
+      Alert.alert("Error", "No se pudo eliminar tu reseña.")
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const confirmDeleteReview = () => {
+    Alert.alert(
+      "Eliminar Reseña",
+      "¿Estás seguro de que deseas eliminar esta reseña?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Eliminar", 
+          onPress: handleDeleteReview,
+          style: "destructive" 
+        }
+      ]
+    )
   }
 
   const renderStars = (value: number) => {
@@ -302,15 +360,34 @@ export default function RatingScreen() {
             />
             <Text style={{ textAlign: "left", color: "#666" }}>{comment.length}/100</Text>
 
-            <Button
-              mode="contained"
-              onPress={handleRatingSubmit}
-              loading={loading}
-              disabled={loading}
-              style={styles.button}
-            >
-              {isEditing ? "Actualizar Reseña" : "Enviar Reseña"}
-            </Button>
+            <View style={styles.buttonContainer}>
+              <Button
+                mode="contained"
+                onPress={handleRatingSubmit}
+                loading={loading}
+                disabled={loading || deleting}
+                style={[styles.button, { width: '80%' }]}
+              >
+                {isEditing ? "Actualizar Reseña" : "Enviar Reseña"}
+              </Button>
+              
+              {isEditing && (
+                <Button
+                  mode="outlined"
+                  onPress={confirmDeleteReview}
+                  disabled={loading || deleting}
+                  style={styles.deleteButton}
+                  textColor="#D32F2F"
+                >
+                  <View style={{flexDirection: "row", alignItems: "center"}}>
+                    <MaterialIcons name="delete-outline" size={18} color="#D32F2F" />
+                    <Text style={{ marginLeft: 5, color: "#D32F2F", fontWeight: "500" }}>
+                      Eliminar Reseña
+                    </Text>
+                  </View>
+                </Button>
+              )}
+            </View>
 
             <View style={styles.reviewsContainer}>
               <View style={styles.reviewsHeader}>
@@ -406,9 +483,21 @@ const styles = StyleSheet.create({
     borderColor: "#f4ced4",
     backgroundColor: "#fff",
   },
-  button: {
+  buttonContainer: {
+    flexDirection: "column",
+    alignItems: "center",
     marginTop: 10,
+  },
+  button: {
     backgroundColor: "#4f0c2e",
+    
+  },
+  deleteButton: {
+    borderColor: "#D32F2F",
+    borderWidth: 1,
+    justifyContent: "center",
+    marginTop: 10,
+    width: '80%',
   },
   reviewsContainer: {
     marginTop: 30,
@@ -472,6 +561,5 @@ const styles = StyleSheet.create({
   noReviews: {
     textAlign: "center",
     color: "#888",
-  },
+  }
 })
-

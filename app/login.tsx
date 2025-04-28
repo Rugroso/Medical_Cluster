@@ -20,7 +20,7 @@ export default function LoginScreen() {
             resizeMode="contain"
           />
       </View>
-      <Text style={styles.title}>Iniciar Sesión</Text>
+      <Text style={styles.title}>Bienvenido a Medical Cluster SLRC</Text>
 
       <TextInput
         label="Correo Electrónico"

@@ -490,10 +490,13 @@ export default function DoctorMap() {
                   centerMapOnDoctor(doctor)
                 }}
               >
-                <Image
-                  source={{ uri: doctor.image || "https://via.placeholder.com/50" }}
-                  style={styles.doctorCardImage}
-                />
+                <View style={{ overflow: "hidden", height: 80 }}>
+                  <Image
+                    source={{ uri: doctor.image || "" }}
+                    style={{ width: "100%", height: undefined, aspectRatio: 1 }}
+                    resizeMode="cover"
+                  />
+                </View> 
                 <View style={styles.doctorCardContent}>
                   <Text style={styles.doctorCardName} numberOfLines={1}>
                     {doctor.name}
@@ -844,6 +847,7 @@ const styles = StyleSheet.create({
   doctorCardImage: {
     width: "100%",
     height: 80,
+    alignSelf: "flex-start"
   },
   doctorCardContent: {
     padding: 8,

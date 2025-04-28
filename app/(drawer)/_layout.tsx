@@ -122,6 +122,17 @@ function CustomDrawerContent() {
     { title: "Configuración", icon: "cog", path: '/settings' },
   ];
 
+  const menuItemsAdmin: { title: string; icon: keyof typeof MaterialCommunityIcons.glyphMap, path: string }[] = [
+    { title: "Inicio", icon: "home", path: '/(tabs)/stackhome' },
+    { title: "Preguntas Frecuentes", icon: "frequently-asked-questions", path: '/faq' },
+    { title: "Contacto", icon: "contacts", path: '/contact' },
+    // { title: "Términos y Condiciones", icon: "file-document-outline", path: '/termAndCond' }, Están para despues
+    // { title: "Política de Privacidad", icon: "shield-lock-outline", path: '/privacy' },
+    { title: "Sobre Medical Cluster SLRC", icon: "hospital-building", path: '/about' },
+    { title: "Configuración", icon: "cog", path: '/settings' },
+    { title: "Panel de Administrador", icon: "file-document-edit", path: '/(admintabs)/' },
+  ];
+
   return (
     <View style={styles.drawerContainer}>
       <View style={styles.titleContainer}>
@@ -152,10 +163,10 @@ function CustomDrawerContent() {
             value={isDarkMode}
           />
         </View> */}
-        {!isAdmin && (
+        {isAdmin ? (
           <View>
             <View style={styles.divider} />
-            {menuItems.map((item, index) => (
+            {menuItemsAdmin.map((item, index) => (
               <View key={index}>
                 <TouchableOpacity 
                   style={styles.menuItemContainer}
@@ -171,6 +182,25 @@ function CustomDrawerContent() {
               </View>
             ))}
           </View>
+        ) : (
+          <View>
+          <View style={styles.divider} />
+          {menuItems.map((item, index) => (
+            <View key={index}>
+              <TouchableOpacity 
+                style={styles.menuItemContainer}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  router.push(item.path as any);
+                }}
+              >
+                <MaterialCommunityIcons name={item.icon} size={24} color="#4f0b2e" />
+                <Text style={styles.drawerItem}>{item.title}</Text>
+              </TouchableOpacity>
+              <View style={styles.dividerItems} />
+            </View>
+          ))}
+        </View>
         )}
       </View>
       
