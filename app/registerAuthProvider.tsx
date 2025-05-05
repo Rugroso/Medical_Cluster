@@ -400,13 +400,6 @@ export default function RegisterAuthProviderScreen() {
               )}
             </TouchableOpacity>
           </View>
-
-          <Text style={styles.loginText}>
-            ¿Ya tienes cuenta?{" "}
-            <Text style={styles.loginLink} onPress={() => router.replace("/login")}>
-              Inicia sesión
-            </Text>
-          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

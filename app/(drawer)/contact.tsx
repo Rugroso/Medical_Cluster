@@ -92,19 +92,15 @@ export default function ContactoScreen() {
         </View>
         
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Horario de Atención (Chat)</Text>
+          <Text style={styles.sectionTitle}>Horario de Atención de la App</Text>
           
           <View style={styles.scheduleContainer}>
             <View style={styles.scheduleItem}>
               <Text style={styles.scheduleDay}>Lunes - Viernes</Text>
-              <Text style={styles.scheduleHours}>8:00 AM - 8:00 PM</Text>
+              <Text style={styles.scheduleHours}>8:00 AM - 3:00 PM (GMT-7)</Text>
             </View>
             <View style={styles.scheduleItem}>
-              <Text style={styles.scheduleDay}>Sábados</Text>
-              <Text style={styles.scheduleHours}>9:00 AM - 2:00 PM</Text>
-            </View>
-            <View style={styles.scheduleItem}>
-              <Text style={styles.scheduleDay}>Domingos</Text>
+              <Text style={styles.scheduleDay}>Sábado y Domingo</Text>
               <Text style={styles.scheduleHours}>Sin Servicio</Text>
             </View>
           </View>
@@ -160,7 +156,16 @@ export default function ContactoScreen() {
             onPress={() => handleContactPress('email', 'contacto@medicalclusterslrc.com')}
           >
             <MaterialCommunityIcons name="email-outline" size={20} color="#ffffff" />
-            <Text style={styles.contactButtonText}>Enviar Correo</Text>
+            <Text style={styles.contactButtonText}>Enviar </Text>
+          </TouchableOpacity>
+
+         
+          <TouchableOpacity 
+            style={[styles.contactButton, styles.emailButton]}
+            onPress={() => handleContactPress('website', 'http://medicalclusterslrc.com/ayuda')}
+          >
+            <MaterialCommunityIcons name="file-document-edit-outline" size={20} color="#ffffff" />
+            <Text style={styles.contactButtonText}>Enviar Formulario</Text>
           </TouchableOpacity>
         </View>
         
@@ -237,12 +242,12 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ffffff',
   },
   scheduleDay: {
-    fontSize: 16,
+    fontSize: 15,
     color: 'black',
     fontWeight: '500',
   },
   scheduleHours: {
-    fontSize: 16,
+    fontSize: 15,
     color: 'black',
     fontWeight: '600',
   },

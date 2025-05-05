@@ -5,6 +5,7 @@ import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Animated, Easin
 import { ScrollView } from "react-native-gesture-handler"
 import { router, useNavigation } from "expo-router"
 import { MaterialCommunityIcons, FontAwesome5, Ionicons } from "@expo/vector-icons"
+import * as Notifications from "expo-notifications"
 import { Searchbar } from "react-native-paper"
 import { useAuth } from "@/context/AuthContext"
 import { db } from "../../../../config/Firebase_Conf"
@@ -292,6 +293,12 @@ export default function App() {
   React.useEffect(() => {
     loadData()
   }, [])
+
+  React.useEffect(() => {
+    Notifications.getAllScheduledNotificationsAsync().then((notifications) => {
+      console.log("Notificaciones pendientes:", notifications);
+    });
+  }, []);
 
   const placeholderData: string = `¿Qué sientes hoy? | Doctor | Especialidad`
 

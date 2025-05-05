@@ -61,7 +61,7 @@ export default function AppointmentsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("dateAsc");
+  const [sortBy, setSortBy] = useState<SortOption>("dateDesc");
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(null);
   const [showStatusOptions, setShowStatusOptions] = useState(false);

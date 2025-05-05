@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import * as Notifications from "expo-notifications";
 import { WebView } from "react-native-webview";
@@ -10,7 +10,7 @@ import { db } from "../../../../config/Firebase_Conf";
 export default function App() {
   const route = useRoute();
   const { user } = useAuth();
-  const { calendly, doctorIdParam } = (route?.params as { calendly: string, doctorIdParam: string });
+  const { calendly, doctorIdParam, doctorNameParam } = (route?.params as { calendly: string, doctorIdParam: string, doctorNameParam: string });
   
   const [appointmentData, setAppointmentData] = useState({ date: "", time: "", timeZone: "" });
 
@@ -20,17 +20,19 @@ export default function App() {
     const diffInSeconds = Math.floor((oneHourBefore.getTime() - now.getTime()) / 1000);
   
     if (diffInSeconds <= 0) {
+      console.log("La cita ya ha pasado o está programada para menos de una hora.");
       return;
     }
+    
   
     const identifier = await Notifications.scheduleNotificationAsync({
       content: {
         title: 'Cita programada',
-        body: `Tu cita con el doctor ${doctorIdParam} comenzará en una hora.`,
+        body: `Tu cita con el doctor ${doctorNameParam} comenzará en una hora.`,
         sound: 'default',
       },
       trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
         seconds: diffInSeconds,
         repeats: false,
       },
@@ -40,9 +42,9 @@ export default function App() {
 
   const handleNavigationStateChange = (navState: any) => {
     const currentUrl = navState.url;
-    console.log("Current URL:", currentUrl);
-    console.log("Doctor ID:", doctorIdParam);
-    console.log("User ID:", user?.uid);
+    // console.log("Current URL:", currentUrl);
+    // console.log("Doctor ID:", doctorIdParam);
+    // console.log("User ID:", user?.uid);
 
     if (currentUrl.includes("month") && currentUrl.includes("?")) {
       const regex = /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2})/;
@@ -107,9 +109,6 @@ export default function App() {
       }
     }
   };
-
-
-  
 
   return (
     <View style={styles.container}>

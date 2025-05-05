@@ -284,6 +284,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
         return;
       }
+      if (resp.user.emailVerified === false) {
+        Alert.alert("Error", "Debes verificar tu correo electrónico antes de iniciar sesión");
+        setLoading(false);
+        return;
+      }
       const isAdmin = snap.data()?.isAdmin || false;
       router.replace(isAdmin ? "/(drawer)/(admintabs)" : "/(drawer)/(tabs)/stackhome");
     } catch (e: any) {

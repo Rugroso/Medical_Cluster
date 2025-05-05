@@ -265,7 +265,7 @@ export default function ProfileScreen() {
           });
           let appointmentDisplay = await Promise.all(appointmentPromises);
           const filtered = appointmentDisplay.filter((r): r is AppointmentDisplay => r !== null);
-          filtered.sort((a, b) => a.timestamp - b.timestamp);
+          filtered.sort((a, b) => b.timestamp - a.timestamp);
           setAppointments(filtered);
         } else {
           setAppointments([]);

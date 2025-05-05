@@ -214,6 +214,7 @@ export default function RegisterScreen() {
                 style={[styles.input, emailError ? styles.inputError : null]}
                 placeholder="correo@ejemplo.com"
                 placeholderTextColor="#666"
+                activeUnderlineColor="#4f0b2e"
                 value={email}
                 onChangeText={(text) => {
                   setEmail(text)
@@ -240,6 +241,8 @@ export default function RegisterScreen() {
                   style={[styles.phoneInput, phoneError ? styles.inputError : null]}
                   placeholder="1234567890"
                   placeholderTextColor="#666"
+                  activeUnderlineColor="#4f0b2e"
+
                   value={cellphone}
                   onChangeText={(text) => {
                     let limitedText = text.slice(0, 10);
@@ -293,6 +296,7 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Nombre"
+                activeUnderlineColor="#4f0b2e"
                 placeholderTextColor="#666"
                 value={name}
                 onChangeText={(text) => {setName(text.slice(0, 20));}}
@@ -305,11 +309,12 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Apellidos"
+                activeUnderlineColor="#4f0b2e"
                 placeholderTextColor="#666"
                 value={lastName}
-                onChangeText={setLastName}
+                onChangeText={(text) => setLastName(text.slice(0, 40))}
               />
-              <Text style={{marginTop:4}}> {name.length}/40</Text>
+              <Text style={{marginTop:4}}> {lastName.length}/40</Text>
 
             </View>
             <Text style={styles.inputLabel}>Fecha de Nacimiento</Text>
@@ -317,6 +322,7 @@ export default function RegisterScreen() {
               <TextInput
                 value={birthdate.toLocaleDateString()}
                 mode="outlined"
+                activeUnderlineColor="#4f0b2e"
                 style={styles.input}
                 editable={false}
                 pointerEvents="none"
@@ -342,6 +348,7 @@ export default function RegisterScreen() {
                 value={gender || ""}
                 mode="outlined"
                 style={styles.input}
+                activeUnderlineColor="#4f0b2e"
                 placeholder="Selecciona tu género"
                 placeholderTextColor="#666"
                 editable={false}
@@ -381,6 +388,7 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Contraseña"
+                activeUnderlineColor="#4f0b2e"
                 placeholderTextColor="#666"
                 value={password}
                 onChangeText={setPassword}
@@ -393,6 +401,7 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Confirmar Contraseña"
+                activeUnderlineColor="#4f0b2e"
                 placeholderTextColor="#666"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -408,6 +417,7 @@ export default function RegisterScreen() {
                 value={location}
                 onChangeText={setLocation}
                 placeholder="Ingresa tu ubicación"
+                activeUnderlineColor="#4f0b2e"
                 placeholderTextColor="#666"
                 style={styles.input}
               />

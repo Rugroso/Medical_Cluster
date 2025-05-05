@@ -45,6 +45,7 @@ export default function stackhome() {
         }}
       />
       <Stack.Screen name="categorias" options={{ headerTitle: "Especialidades" }} />
+      <Stack.Screen name="appointment" options={{ headerTitle: "Agendar Cita" }} />
       <Stack.Screen name="rating" options={{ headerTitle: "Reseñas" }} />
       <Stack.Screen name="doctor" options={{ headerTitle: "Médico" }} />
       <Stack.Screen name="categorias/medicos" options={{ headerTitle: "Médicos" }} />

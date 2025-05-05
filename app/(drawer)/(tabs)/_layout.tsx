@@ -56,7 +56,6 @@ async function registerForPushNotificationsAsync() {
       const pushTokenString = (
         await Notifications.getExpoPushTokenAsync({ projectId })
       ).data;
-      console.log('Expo Push Token:', pushTokenString);
       return pushTokenString;
     } catch (e: unknown) {
       handleRegistrationError(`${e}`);
@@ -89,9 +88,7 @@ export default function TabLayout() {
             if (!existingTokens.includes(token)) {
               const updatedTokens = [...existingTokens, token];
               await setDoc(userRef, { expoPushTokens: updatedTokens }, { merge: true });
-              console.log('Nuevo token agregado a Firestore.');
             } else {
-              console.log('Token ya registrado, no se vuelve a guardar.');
             }
           }
         }
@@ -102,9 +99,7 @@ export default function TabLayout() {
       setNotification(notification);
     });
 
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log(response);
-    });
+
 
     return () => {
       if (notificationListener.current) {

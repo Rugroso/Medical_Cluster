@@ -65,7 +65,7 @@ export default function PreguntasFrecuentesScreen() {
     },
     {
       question: "¿Cuáles son los horarios de soporte?",
-      answer: "No existe un horario de atención particular, puedes enviar un correo a medicalcluster@gmail.com, recibiendo una respuesta entre 24 y 48 horas."
+      answer: "El horario es de 8:00 AM a 3:00 PM (GMT-7), puedes enviar un correo a medicalcluster@gmail.com o contactarte a través del formulario, recibiendo una respuesta entre 24 y 48 horas."
     },
     {
       question: "¿Qué especialidades médicas están disponibles?",
@@ -77,7 +77,15 @@ export default function PreguntasFrecuentesScreen() {
     },
     {
       question: "¿Cómo puedo reportar un problema técnico?",
-      answer: `Si encuentras un problema técnico, puedes reportarlo enviando un correo electrónico a medicalcluster@gmail.com. o a través del chat en vivo`
+      answer: `Si encuentras un problema técnico, puedes reportarlo enviando un correo electrónico a medicalcluster@gmail.com. o a través del formulario`
+    },
+    {
+      question: "¿Cómo puedo cambiar la visualización de temperatura a otra unidad?",
+      answer: `Desde configuración puedes cambiar la visualización de temperatura a Celsius o Fahrenheit.`
+    },
+    {
+      question: "¿Cómo puedo cambiar las preferencias del tiempo de cruce a USA? Ej. General, SENTRI, etc.",
+      answer: `Desde configuración puedes cambiar las preferencias del tiempo de cruce a USA.`
     }
   ];
 
@@ -185,7 +193,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'black',
     lineHeight: 22,
-    textAlign: 'justify',
   },
   contactSection: {
     backgroundColor: '#ffffff',
