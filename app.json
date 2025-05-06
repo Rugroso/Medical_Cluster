@@ -10,7 +10,8 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.abrahamsl.Medical-Cluster-SLRC"
+      "bundleIdentifier": "com.abrahamsl.Medical-Cluster-SLRC",
+      "appleTeamId": "WZ24K3A449"
     },
     "android": {
       "adaptiveIcon": {
@@ -34,7 +35,9 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

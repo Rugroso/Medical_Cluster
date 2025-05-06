@@ -172,7 +172,7 @@ function CustomDrawerContent() {
                   style={styles.menuItemContainer}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    router.push(item.path as any);
+                    router.navigate(item.path as any);
                   }}
                 >
                   <MaterialCommunityIcons name={item.icon} size={24} color="#4f0b2e" />
@@ -191,7 +191,7 @@ function CustomDrawerContent() {
                 style={styles.menuItemContainer}
                 onPress={() => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  router.push(item.path as any);
+                  router.navigate(item.path as any);
                 }}
               >
                 <MaterialCommunityIcons name={item.icon} size={24} color="#4f0b2e" />
