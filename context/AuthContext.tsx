@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     androidClientId: androidClientIdGoogle,
   });
 
-  //Esto es para android usando react-native-google-signin
+  // Esto es para android usando react-native-google-signin
   useEffect(() => {
     if (!isIOS) {
       GoogleSignin.configure({
@@ -83,6 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
     return () => unsubscribe();
   }, [isIOS]);
+  //DESCOMENTAR ESTO PARA QUE FUNCIONE EN ANDROID
 
   //iOS
   useEffect(() => {

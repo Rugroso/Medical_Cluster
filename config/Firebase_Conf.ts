@@ -30,7 +30,6 @@ export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
 });
 export const db = getFirestore(app)
-export const usersRef = collection(db, 'users')
 export const googleProvider = new GoogleAuthProvider();
 export const facebookProvider = new FacebookAuthProvider();
 export const storage = getStorage(app); // Inicializar Firebase Storage

@@ -13,7 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { FontAwesome5, Ionicons, AntDesign, Feather } from "@expo/vector-icons";
 import { db } from "../../../../../config/Firebase_Conf";
-import { collection, query, getDocs, where } from "firebase/firestore";
+import { collection, query, getDocs, where, orderBy } from "firebase/firestore";
 import MedCardSM from "@/components/MedCardSM";
 import * as Haptics from "expo-haptics";
 import { getAuth } from "firebase/auth";
@@ -60,31 +60,9 @@ export default function DoctorsScreen() {
   const [userFavorites, setUserFavorites] = useState<string[]>([]);
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [showFilterOptions, setShowFilterOptions] = useState(false);
-  const [specialties, setSpecialties] = useState<string[]>([
-    "Anestesiología",
-    "Cardiología",
-    "Cirugía General",
-    "Dermatología",
-    "Endocrinología",
-    "Gastroenterología",
-    "Ginecología y Obstetricia",
-    "Hematología",
-    "Infectología",
-    "Nefrología",
-    "Neumología",
-    "Neurología",
-    "Odontología",
-    "Oftalmología",
-    "Oncología",
-    "Ortopedia",
-    "Pediatría",
-    "Psicología",
-    "Psiquiatría",
-    "Radiología",
-    "Reumatología",
-    "Urología",
-  ]);
+  const [specialties, setSpecialties] = useState<string[]>([]);
   const defColor = "#4f0b2e";
+
   
   const OPTION_ITEM_HEIGHT = 45; 
   const MAX_VISIBLE_OPTIONS = 3; 
@@ -93,6 +71,30 @@ export default function DoctorsScreen() {
     const parsedHour: number = parseInt(hour.slice(0, -3));
     return pm ? (parsedHour + 12).toString() : parsedHour.toString();
   };
+
+  const getSpecialties = async (): Promise<string[]> => {
+    try {
+      const q = query(collection(db, "specialties"), orderBy("title"));
+      const snapshot = await getDocs(q);
+      const titles = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return data.title || "";
+      });
+      return titles.filter(title => title); 
+    } catch (error) {
+      console.error("Error obteniendo especialidades:", error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      await loadData();
+      const specialtiesFromDB = await getSpecialties();
+      setSpecialties(specialtiesFromDB);
+    };
+    init();
+  }, []);
 
   const getDoctors = async (): Promise<Doctor[]> => {
     try {

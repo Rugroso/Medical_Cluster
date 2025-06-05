@@ -21,7 +21,7 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 import "react-native-get-random-values"
 import { storage } from "../../../../config/Firebase_Conf"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
-import { setDoc, collection, addDoc } from "firebase/firestore"
+import { setDoc, collection, addDoc, query, orderBy, getDocs } from "firebase/firestore"
 import { db } from "../../../../config/Firebase_Conf"
 import TimeSelector from "@/components/TimeSelector"
 import * as ImagePicker from "expo-image-picker"
@@ -42,8 +42,8 @@ export default function AddDoctor() {
   const [rating] = useState(0.0)
   const [services, setServices] = useState<string[]>([])
   const [image, setImage] = useState<string | null>(null)
-  const [latitude, setLatitude] = useState(32.4499982)
-  const [longitude, setLongitude] = useState(-114.768663592)
+  const [latitude, setLatitude] = useState(0)
+  const [longitude, setLongitude] = useState(0)
   const [tags, setTags] = useState<string[]>([])
   const [addressModalVisible, setAddressModalVisible] = useState(false)
   const [newSpecialty, setNewSpecialty] = useState("")
@@ -62,28 +62,28 @@ export default function AddDoctor() {
 
   const [specialties, setSpecialties] = useState<string[]>([])
   
-  const dataSpecialties = [
-    { key: '1', value: 'Cardiología' },
-    { key: '2', value: 'Dermatología' },
-    { key: '3', value: 'Endocrinología' },
-    { key: '4', value: 'Gastroenterología' },
-    { key: '5', value: 'Hematología' },
-    { key: '6', value: 'Infectología' },
-    { key: '7', value: 'Nefrología' },
-    { key: '8', value: 'Neumología' },
-    { key: '9', value: 'Neurología' },
-    { key: '10', value: 'Oftalmología' },
-    { key: '11', value: 'Oncología' },
-    { key: '12', value: 'Ortopedia' },
-    { key: '13', value: 'Pediatría' },
-    { key: '14', value: 'Psiquiatría' },
-    { key: '15', value: 'Radiología' },
-    { key: '16', value: 'Reumatología' },
-    { key: '17', value: 'Urología' },
-    { key: '18', value: 'Ginecología y Obstetricia' },
-    { key: '19', value: 'Cirugía General' },
-    { key: '20', value: 'Anestesiología' },
-  ];
+  const [dataSpecialties, setDataSpecialties] = useState<{ key: string; value: string }[]>([]);
+
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const q = query(collection(db, "specialties"), orderBy("title"));
+        const snapshot = await getDocs(q);
+        const specialtiesList = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            key: doc.id,
+            value: data.title,
+          };
+        });
+        setDataSpecialties(specialtiesList);
+      } catch (error) {
+        console.error("Error fetching specialties:", error);
+      }
+    };
+  
+    fetchSpecialties();
+  }, []);
 
   const generateNewImage = async () => { 
     context.resize({ width: 1000, height: 1000 });
@@ -681,55 +681,54 @@ export default function AddDoctor() {
 
           <View style={styles.googlePlacesContainer}>
             <GooglePlacesAutocomplete
-              placeholder="Buscar dirección"
-              onPress={(data, details) => {
-                if (details) {
-                  setAddress(data.description)
-                  setLatitude(details.geometry.location.lat)
-                  setLongitude(details.geometry.location.lng)
-                  setAddressModalVisible(false)
-                } else {
-                  setAddress(data.description)
-                  setAddressModalVisible(false)
-                }
-              }}
+              placeholder="Search"
               query={{
                 key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
-                language: "es",
+                language: 'es',
               }}
-              styles={{
-                container: {
-                  flex: 0,
-                },
-                textInputContainer: {
-                  width: "100%",
-                },
-                textInput: {
-                  height: 46,
-                  color: "#333",
-                  fontSize: 16,
-                  backgroundColor: "#f5f5f5",
-                  borderRadius: 8,
-                  paddingHorizontal: 12,
-                  paddingVertical: 10,
-                },
-                listView: {
-                  backgroundColor: "#fff",
-                },
-                description: {
-                  fontSize: 14,
-                },
-                row: {
-                  padding: 13,
-                  height: 50,
-                },
+              autoFillOnNotFound={false}
+              currentLocation={false}
+              currentLocationLabel="Current location"
+              debounce={0}
+              disableScroll={false}
+              enableHighAccuracyLocation={true}
+              enablePoweredByContainer={true}
+              fetchDetails={false}
+              filterReverseGeocodingByTypes={[]}
+              GooglePlacesDetailsQuery={{}}
+              GoogleReverseGeocodingQuery={{}}
+              isRowScrollable={true}
+              keyboardShouldPersistTaps="always"
+              listUnderlayColor="#c8c7cc"
+              listViewDisplayed="auto"
+              keepResultsAfterBlur={false}
+              minLength={1}
+              nearbyPlacesAPI="GooglePlacesSearch"
+              numberOfLines={1}
+              onFail={() => {}}
+              onNotFound={() => {}}
+              onPress={(data, details = null) => {
+                setAddress(data.description)
+                if (details && details.geometry && details.geometry.location) {
+                  setLatitude(details.geometry.location.lat)
+                }
+                if (details?.geometry?.location?.lng) {
+                  setLongitude(details.geometry.location.lng)
+                }
+                setAddressModalVisible(false)
               }}
-              fetchDetails={true}
-              enablePoweredByContainer={false}
-              minLength={2}
-              debounce={300}
-              listViewDisplayed={true}
-              keyboardShouldPersistTaps="handled"
+              onTimeout={() =>
+                console.warn('google places autocomplete: request timeout')
+              }
+              predefinedPlaces={[]}
+              predefinedPlacesAlwaysVisible={false}
+              styles={{}}
+              suppressDefaultStyles={false}
+              textInputHide={false}
+              textInputProps={{
+                defaultValue: address,
+              }}
+              timeout={20000}
             />
           </View>
         </SafeAreaView>

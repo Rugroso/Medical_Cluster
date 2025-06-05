@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Platform,
   KeyboardAvoidingView,
+  Modal,
 } from "react-native"
 import { router, useLocalSearchParams } from "expo-router"
 import { MaterialIcons, Feather } from "@expo/vector-icons"
@@ -27,10 +28,6 @@ import { SaveFormat, useImageManipulator } from "expo-image-manipulator"
 import { MultipleSelectList } from "react-native-dropdown-select-list"
 import TimeSelector from "@/components/TimeSelector"
 
-
-
-
-
 export default function EditDoctor() {
   const params = useLocalSearchParams()
   const doctorId = params.doctorId as string
@@ -42,14 +39,15 @@ export default function EditDoctor() {
   const [completeDescription, setCompleteDescription] = useState("")
   const [specialties, setSpecialties] = useState<string[]>([])
   const [address, setAddress] = useState("")
+  const [addressModalVisible, setAddressModalVisible] = useState(false)
   const [opening, setOpening] = useState("8:00AM-5:00PM")
   const [phone, setPhone] = useState("")
   const [rating, setRating] = useState(0.0)
   const [services, setServices] = useState<string[]>([])
   const [image, setImage] = useState<string | null>(null)
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null)
-  const [latitude, setLatitude] = useState(32.4499982)
-  const [longitude, setLongitude] = useState(-114.768663592)
+  const [latitude, setLatitude] = useState(0)
+  const [longitude, setLongitude] = useState(0)
   const [tags, setTags] = useState<string[]>([])
   const [gallery, setGallery] = useState<string[]>([])
   const [calendly, setCalendly] = useState('')
@@ -111,8 +109,8 @@ const dataSpecialties = [
           setRating(doctorData.rating || 0.0)
           setServices(doctorData.services || [])
           setTags(doctorData.tags || [])
-          setLatitude(doctorData.latitude || 32.4499982)
-          setLongitude(doctorData.longitude || -114.768663592)
+          setLatitude(doctorData.latitude || 0)
+          setLongitude(doctorData.longitude || 0)
           setGallery(doctorData.gallery || [])
           setCalendly(doctorData.calendly || '')
           setBackgroundImage(doctorData.backgroundImage || null)
@@ -499,69 +497,13 @@ const dataSpecialties = [
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Dirección</Text>
-              <View style={styles.googlePlacesContainer}>
-                <GooglePlacesAutocomplete
-                  placeholder="Buscar dirección"
-                  onPress={(data, details) => {
-                    if (details) {
-                      setAddress(data.description)
-                      setLatitude(details.geometry.location.lat)
-                      setLongitude(details.geometry.location.lng)
+              <TouchableOpacity style={styles.addressInput} onPress={() => setAddressModalVisible(true)}>
+                <Text style={address ? styles.addressText : styles.addressPlaceholder}>
+                  {address || "Buscar dirección"}
+                </Text>
+                <Feather name="map-pin" size={20} color="#4f0b2e" />
+              </TouchableOpacity>
 
-                    } else {
-                      setAddress(data.description)
-                    }
-                  }}
-                  query={{
-                    key:  process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
-                    language: "es",
-                  }}
-                  styles={{
-                    container: {
-                      flex: 0,
-                      width: "100%",
-                      zIndex: 1,
-                    },
-                    textInputContainer: {
-                      width: "100%",
-                    },
-                    textInput: {
-                      height: 46,
-                      color: "#333",
-                      fontSize: 16,
-                      backgroundColor: "#f5f5f5",
-                      borderRadius: 8,
-                      paddingHorizontal: 12,
-                      paddingVertical: 10,
-                    },
-                    listView: {
-                      backgroundColor: "#fff",
-                      borderWidth: 1,
-                      borderColor: "#e0e0e0",
-                      borderRadius: 8,
-                      position: "absolute",
-                      top: 46,
-                      left: 0,
-                      right: 0,
-                      zIndex: 1000,
-                    },
-                    description: {
-                      fontSize: 14,
-                    },
-                    row: {
-                      padding: 13,
-                      height: 50,
-                    },
-                  }}
-                  fetchDetails={true}
-                  enablePoweredByContainer={false}
-                  minLength={2}
-                  debounce={300}
-                  textInputProps={{
-                    defaultValue: address,
-                  }}
-                />
-              </View>
               {latitude && longitude && (
                 <Text style={styles.coordinatesText}>
                   Lat: {latitude}, Lng: {longitude}
@@ -777,6 +719,8 @@ const dataSpecialties = [
             </View>
           </View>
 
+          
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()}>
               <Text style={styles.cancelButtonText}>Cancelar</Text>
@@ -795,6 +739,75 @@ const dataSpecialties = [
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <Modal
+        visible={addressModalVisible}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setAddressModalVisible(false)}
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity style={styles.modalBackButton} onPress={() => setAddressModalVisible(false)}>
+              <MaterialIcons name="arrow-back" size={24} color="#4f0b2e" />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Buscar dirección</Text>
+            <View style={{ width: 24 }} />
+          </View>
+
+          <View style={styles.googlePlacesContainer}>
+            <GooglePlacesAutocomplete
+              placeholder="Search"
+              query={{
+                key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
+                language: 'es',
+              }}
+              autoFillOnNotFound={false}
+              currentLocation={false}
+              currentLocationLabel="Current location"
+              debounce={0}
+              disableScroll={false}
+              enableHighAccuracyLocation={true}
+              enablePoweredByContainer={true}
+              fetchDetails={true}
+              filterReverseGeocodingByTypes={[]}
+              GooglePlacesDetailsQuery={{}}
+              GoogleReverseGeocodingQuery={{}}
+              isRowScrollable={true}
+              keyboardShouldPersistTaps="always"
+              listUnderlayColor="#c8c7cc"
+              listViewDisplayed="auto"
+              keepResultsAfterBlur={false}
+              minLength={1}
+              nearbyPlacesAPI="GooglePlacesSearch"
+              numberOfLines={1}
+              onFail={() => {}}
+              onNotFound={() => {}}
+              onPress={(data, details = null) => {
+                setAddress(data.description)
+                if (details && details.geometry && details.geometry.location) {
+                  setLatitude(details.geometry.location.lat)
+                }
+                if (details?.geometry?.location?.lng) {
+                  setLongitude(details.geometry.location.lng)
+                }
+                setAddressModalVisible(false)
+              }}
+              onTimeout={() =>
+                console.warn('google places autocomplete: request timeout')
+              }
+              predefinedPlaces={[]}
+              predefinedPlacesAlwaysVisible={false}
+              styles={{}}
+              suppressDefaultStyles={false}
+              textInputHide={false}
+              textInputProps={{
+                defaultValue: address,
+              }}
+              timeout={20000}
+            />
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -945,8 +958,8 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   googlePlacesContainer: {
-    marginBottom: 8,
-    zIndex: 1000,
+    flex: 1,
+    padding: 16,
   },
   coordinatesText: {
     fontSize: 12,
@@ -1001,6 +1014,46 @@ const styles = StyleSheet.create({
     borderColor: "#e0e0e0",
     borderStyle: "dashed",
     marginRight: 8,
+  },
+  addressInput: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  addressText: {
+    fontSize: 16,
+    color: "#333",
+    flex: 1,
+  },
+  addressPlaceholder: {
+    fontSize: 16,
+    color: "#999",
+    flex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  modalBackButton: {
+    padding: 8,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
   },
 })
 
