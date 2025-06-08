@@ -365,6 +365,8 @@ export default function DoctorsScreen() {
           <AntDesign name={showFilterOptions ? "up" : "down"} size={12} color={(filterBySpecialty !== null || filterOpenOnly) ? "#FFF" : "#333"} />
         </TouchableOpacity>
 
+      </View>
+      <View style={styles.favoriteFilterContainer}>
         <TouchableOpacity
           style={[
             styles.filterButton,
@@ -378,7 +380,7 @@ export default function DoctorsScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-
+      
       {showSortOptions && (
         <View style={styles.optionsContainer}>
           <ScrollView 
@@ -567,7 +569,14 @@ const styles = StyleSheet.create({
   },
   filtersContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    backgroundColor: "#FFF",
+  },
+    favoriteFilterContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: "#FFF",
@@ -581,8 +590,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    flex: 0.32,
     justifyContent: "center",
+    width: "47%",
   },
   filterButtonText: {
     fontSize: 14,

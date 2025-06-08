@@ -26,6 +26,7 @@ interface Rating {
   userId: string
   rating: number
   comment: string
+  createdAt: string
 }
 
 interface Doctor {
@@ -61,8 +62,9 @@ export default function DoctorMap() {
   const [modalDoctores, setModalDoctores] = useState(true)
   const translateY = useRef(new Animated.Value(0)).current
   const [showOnlyOpen, setShowOnlyOpen] = useState(false)
-
+  
   const mapRef = useRef<MapViewRef>(null)
+  const markerRefs = useRef<{ [doctorId: string]: any }>({});
   const router = useRouter()
   const route = useRoute()
   const defColor = "#4f0b2e"
@@ -92,6 +94,15 @@ export default function DoctorMap() {
     }).start()
   }
 
+  const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
   useEffect(() => {
     ;(async () => {
       try {
@@ -117,8 +128,7 @@ export default function DoctorMap() {
     return pm ? (parsedHour + 12).toString() : parsedHour.toString()
   }
 
-  useEffect(() => {
-    const fetchDoctors = async () => {
+   const fetchDoctors = async () => {
       try {
         setLoading(true)
         const q = query(collection(db, "doctors"))
@@ -155,7 +165,7 @@ export default function DoctorMap() {
             }
           })
 
-          setDoctors(processedDoctors)
+          setDoctors(shuffleArray(processedDoctors))
 
           if (doctorIdParam) {
             const selectedDoc = processedDoctors.find((doc) => doc.doctorId === doctorIdParam)
@@ -183,6 +193,7 @@ export default function DoctorMap() {
       }
     }
 
+  useEffect(() => {
     fetchDoctors()
   }, [doctorIdParam])
 
@@ -265,6 +276,11 @@ export default function DoctorMap() {
       >
         {filteredDoctors.map((doctor) => (
           <Marker
+            ref={(ref) => {
+              if (ref) {
+                markerRefs.current[doctor.doctorId] = ref;
+              }
+            }}
             key={doctor.doctorId}
             coordinate={{
               latitude: doctor.latitude,
@@ -450,6 +466,13 @@ export default function DoctorMap() {
         >
           <MaterialCommunityIcons name="clock-outline" size={24} color={showOnlyOpen ? "#FFF" : "#4f0b2e"} />
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.controlButton]}
+          onPress={() => fetchDoctors()}
+        >
+          <MaterialCommunityIcons name="refresh" size={24} color="#4f0b2e"/>
+        </TouchableOpacity>
       </View>
 
       <Animated.View style={[styles.bottomPanel, { transform: [{ translateY }] }]}>
@@ -488,6 +511,12 @@ export default function DoctorMap() {
                 onPress={() => {
                   handleMarkerPress(doctor)
                   centerMapOnDoctor(doctor)
+                  setSelectedDoctor(doctor)
+                  if (Platform.OS === "ios") {
+                    setTimeout(() => {
+                      markerRefs.current[doctor.doctorId]?.showCallout();
+                    }, 1100);
+                  }
                 }}
               >
                 <View style={{ overflow: "hidden", height: 80 }}>

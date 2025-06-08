@@ -387,7 +387,7 @@ export default function AddDoctor() {
                 style={[styles.input, styles.textArea]}
                 placeholder="Información detallada sobre el doctor..."
                 value={completeDescription}
-                onChangeText={(text) => setCompleteDescription(text.slice(0, 40))}
+                onChangeText={(text) => setCompleteDescription(text.slice(0, 200))}
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
@@ -670,70 +670,70 @@ export default function AddDoctor() {
         transparent={false}
         onRequestClose={() => setAddressModalVisible(false)}
       >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity style={styles.modalBackButton} onPress={() => setAddressModalVisible(false)}>
-              <MaterialIcons name="arrow-back" size={24} color="#4f0b2e" />
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Buscar dirección</Text>
-            <View style={{ width: 24 }} />
-          </View>
+         <SafeAreaView style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity style={styles.modalBackButton} onPress={() => setAddressModalVisible(false)}>
+                <MaterialIcons name="arrow-back" size={24} color="#4f0b2e" />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Buscar dirección</Text>
+              <View style={{ width: 24 }} />
+            </View>
 
-          <View style={styles.googlePlacesContainer}>
-            <GooglePlacesAutocomplete
-              placeholder="Search"
-              query={{
-                key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
-                language: 'es',
-              }}
-              autoFillOnNotFound={false}
-              currentLocation={false}
-              currentLocationLabel="Current location"
-              debounce={0}
-              disableScroll={false}
-              enableHighAccuracyLocation={true}
-              enablePoweredByContainer={true}
-              fetchDetails={false}
-              filterReverseGeocodingByTypes={[]}
-              GooglePlacesDetailsQuery={{}}
-              GoogleReverseGeocodingQuery={{}}
-              isRowScrollable={true}
-              keyboardShouldPersistTaps="always"
-              listUnderlayColor="#c8c7cc"
-              listViewDisplayed="auto"
-              keepResultsAfterBlur={false}
-              minLength={1}
-              nearbyPlacesAPI="GooglePlacesSearch"
-              numberOfLines={1}
-              onFail={() => {}}
-              onNotFound={() => {}}
-              onPress={(data, details = null) => {
-                setAddress(data.description)
-                if (details && details.geometry && details.geometry.location) {
-                  setLatitude(details.geometry.location.lat)
+            <View style={styles.googlePlacesContainer}>
+              <GooglePlacesAutocomplete
+                placeholder="Search"
+                query={{
+                  key: process.env.EXPO_PUBLIC_GOOGLE_PLACES_API_KEY,
+                  language: 'es',
+                }}
+                autoFillOnNotFound={false}
+                currentLocation={false}
+                currentLocationLabel="Current location"
+                debounce={0}
+                disableScroll={false}
+                enableHighAccuracyLocation={true}
+                enablePoweredByContainer={true}
+                fetchDetails={true}
+                filterReverseGeocodingByTypes={[]}
+                GooglePlacesDetailsQuery={{}}
+                GoogleReverseGeocodingQuery={{}}
+                isRowScrollable={true}
+                keyboardShouldPersistTaps="always"
+                listUnderlayColor="#c8c7cc"
+                listViewDisplayed="auto"
+                keepResultsAfterBlur={false}
+                minLength={1}
+                nearbyPlacesAPI="GooglePlacesSearch"
+                numberOfLines={1}
+                onFail={() => {}}
+                onNotFound={() => {}}
+                onPress={(data, details = null) => {
+                  setAddress(data.description)
+                  if (details && details.geometry && details.geometry.location) {
+                    setLatitude(details.geometry.location.lat)
+                  }
+                  if (details?.geometry?.location?.lng) {
+                    setLongitude(details.geometry.location.lng)
+                  }
+                  setAddressModalVisible(false)
+                }}
+                onTimeout={() =>
+                  console.warn('google places autocomplete: request timeout')
                 }
-                if (details?.geometry?.location?.lng) {
-                  setLongitude(details.geometry.location.lng)
-                }
-                setAddressModalVisible(false)
-              }}
-              onTimeout={() =>
-                console.warn('google places autocomplete: request timeout')
-              }
-              predefinedPlaces={[]}
-              predefinedPlacesAlwaysVisible={false}
-              styles={{}}
-              suppressDefaultStyles={false}
-              textInputHide={false}
-              textInputProps={{
-                defaultValue: address,
-              }}
-              timeout={20000}
-            />
-          </View>
-        </SafeAreaView>
-      </Modal>
-    </SafeAreaView>
+                predefinedPlaces={[]}
+                predefinedPlacesAlwaysVisible={false}
+                styles={{}}
+                suppressDefaultStyles={false}
+                textInputHide={false}
+                textInputProps={{
+                  defaultValue: address,
+                }}
+                timeout={20000}
+              />
+            </View>
+          </SafeAreaView>
+              </Modal>
+            </SafeAreaView>
   )
 }
 
@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 16,
-    color: "#fff",
+    color: "#000000",
   },
   textArea: {
     height: 100,

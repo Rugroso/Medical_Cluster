@@ -22,7 +22,7 @@ import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplet
 import "react-native-get-random-values"
 import { storage } from "../../../../config/Firebase_Conf"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
-import { doc, getDoc, updateDoc } from "firebase/firestore"
+import { collection, doc, getDoc, getDocs, orderBy, query, updateDoc } from "firebase/firestore"
 import { db } from "../../../../config/Firebase_Conf"
 import { SaveFormat, useImageManipulator } from "expo-image-manipulator"
 import { MultipleSelectList } from "react-native-dropdown-select-list"
@@ -62,31 +62,28 @@ export default function EditDoctor() {
   const [website, SetWebsite] = useState('')
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null)
   const context = useImageManipulator(image || '');
-  
+  const [dataSpecialties, setDataSpecialties] = useState<{ key: string; value: string }[]>([]);
 
-const dataSpecialties = [
-  { key: '1', value: 'Cardiología' },
-  { key: '2', value: 'Dermatología' },
-  { key: '3', value: 'Endocrinología' },
-  { key: '4', value: 'Gastroenterología' },
-  { key: '5', value: 'Hematología' },
-  { key: '6', value: 'Infectología' },
-  { key: '7', value: 'Nefrología' },
-  { key: '8', value: 'Neumología' },
-  { key: '9', value: 'Neurología' },
-  { key: '10', value: 'Oftalmología' },
-  { key: '11', value: 'Oncología' },
-  { key: '12', value: 'Ortopedia' },
-  { key: '13', value: 'Pediatría' },
-  { key: '14', value: 'Psiquiatría' },
-  { key: '15', value: 'Radiología' },
-  { key: '16', value: 'Reumatología' },
-  { key: '17', value: 'Urología' },
-  { key: '18', value: 'Ginecología y Obstetricia' },
-  { key: '19', value: 'Cirugía General' },
-  { key: '20', value: 'Anestesiología' },
-  { key: '21', value: 'Odontología' },
-];
+  useEffect(() => {
+  const fetchSpecialties = async () => {
+    try {
+      const q = query(collection(db, "specialties"), orderBy("title"));
+      const snapshot = await getDocs(q);
+      const specialtiesList = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          key: doc.id,
+          value: data.title,
+        };
+      });
+      setDataSpecialties(specialtiesList);
+    } catch (error) {
+      console.error("Error fetching specialties:", error);
+    }
+  };
+
+  fetchSpecialties();
+}, []);
 
   useEffect(() => {
     const fetchDoctorData = async () => {

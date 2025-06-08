@@ -19,7 +19,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import * as GoogleAuthSession from "expo-auth-session/providers/google";
 
 // IMPORTACIÓN PARA ANDROID (react-native-google-signin)
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
+// import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 interface AuthContextType {
   user: User | null;
@@ -71,12 +71,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Esto es para android usando react-native-google-signin
   useEffect(() => {
-    if (!isIOS) {
-      GoogleSignin.configure({
-        webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID_GOOGLE,
-        offlineAccess: true,
-      });
-    }
+    // if (!isIOS) {
+    //   GoogleSignin.configure({
+    //     webClientId: process.env.EXPO_PUBLIC_WEB_CLIENT_ID_GOOGLE,
+    //     offlineAccess: true,
+    //   });
+    // }
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
