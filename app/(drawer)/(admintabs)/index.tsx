@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, use } from "react"
 import {
   View,
   Text,
@@ -10,11 +10,12 @@ import {
   SafeAreaView,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from "react-native"
 import { router } from "expo-router"
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons"
 import { db } from "../../../config/Firebase_Conf"
-import { collection, query, getDocs } from "firebase/firestore"
+import { collection, query, getDocs, where } from "firebase/firestore"
 import * as Haptics from "expo-haptics"
 import { useAuth } from "@/context/AuthContext"
 import { Feather } from "@expo/vector-icons"
@@ -22,9 +23,16 @@ import { Feather } from "@expo/vector-icons"
 
 interface DashboardStats {
   totalDoctors: number
-
   totalCategories: number
 }
+
+interface User {
+  id: string
+  name: string
+  lastName: string
+  email: string
+}
+
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true)
@@ -35,6 +43,39 @@ export default function AdminDashboard() {
   })
   const [adminName, setAdminName] = useState("Administrador")
   const { user } = useAuth()
+
+  const isDevelopment = () => {
+    Alert.alert("Esta función está en desarrollo y no está disponible actualmente.")
+  }
+
+  const getUserById = async (userId: string): Promise<User | null> => {
+    try {
+      const q = query(collection(db, "users"), where("userId", "==", userId))
+      const querySnapshot = await getDocs(q)
+
+      if (!querySnapshot.empty) {
+        const userData: User = {
+          ...(querySnapshot.docs[0].data() as User),
+        }
+        return userData
+      } else {
+        return null
+      }
+    } catch (error) {
+      return null
+    }
+  }
+
+    const fetchUserData = async () => {
+    if (user) {
+      const userData = await getUserById(user.uid)
+      if (userData) {
+        setAdminName(`${userData.name} ${userData.lastName}`)
+      } else {
+        setAdminName("Administrador")
+      }
+    }
+  }
 
   const fetchStats = async () => {
     try {
@@ -68,11 +109,13 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchStats()
+    fetchUserData()
   }, [])
 
   const onRefresh = useCallback(() => {
     setRefreshing(true)
     fetchStats()
+    fetchUserData()
   }, [])
 
   const handleNavigate = (route: string) => {
@@ -162,7 +205,7 @@ export default function AdminDashboard() {
             </TouchableOpacity>
 
             <View style={styles.actionRowContainer}>
-              <TouchableOpacity style={styles.actionCard} onPress={() => handleNavigate("/(admin)/users")}>
+              <TouchableOpacity style={styles.actionCard} onPress={() => isDevelopment()}>
                 <View style={styles.smallActionIconContainer}>
                   <MaterialIcons name="people" size={24} color="#4f0b2e" />
                 </View>

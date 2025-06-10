@@ -114,7 +114,7 @@ const getDoctorById = async (doctorId: string): Promise<Doctor | null> => {
         rating: average,
       };
     } else {
-      console.log("No se encontró el doctor con ID:", doctorId);
+      // console.log("No se encontró el doctor con ID:", doctorId);
       return null;
     }
   } catch (error) {
@@ -151,10 +151,10 @@ export default function ProfileScreen() {
       if (!querySnapshot.empty) {
         const fetchedUserData = { ...(querySnapshot.docs[0].data() as User) };
         setUserData(fetchedUserData);
-        console.log("Usuario encontrado:", fetchedUserData);
+        // console.log("Usuario encontrado:", fetchedUserData);
         return fetchedUserData;
       } else {
-        console.log("No se encontró ningún usuario con ese ID.");
+        // console.log("No se encontró ningún usuario con ese ID.");
         return null;
       }
     } catch (error) {
@@ -323,14 +323,14 @@ export default function ProfileScreen() {
 
         const uploadTask = uploadBytesResumable(storageRef, blob)
         let imageUrl:string = ''
-        console.log(imageName)
+        // console.log(imageName)
         
         await new Promise((resolve, reject) => {
           uploadTask.on(
             "state_changed",
             (snapshot) => {
               const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-              console.log(`Upload is ${progress}% done`)
+              // console.log(`Upload is ${progress}% done`)
             },
             (error) => {
               console.error("Error uploading image:", error)
@@ -338,7 +338,7 @@ export default function ProfileScreen() {
             },
             async () => {
               imageUrl = await getDownloadURL(uploadTask.snapshot.ref)
-              console.log("Image uploaded, URL:", imageUrl)
+              // console.log("Image uploaded, URL:", imageUrl)
               setProfilePicture (imageUrl)
               Alert.alert("Foto de Perfil", "La foto de Perfil ha sido actualizada con éxito")
               resolve(null)

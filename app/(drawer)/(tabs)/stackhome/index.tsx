@@ -1,6 +1,7 @@
 "use client"
 
-import React from "react"
+import * as React from "react"
+import type { JSX } from "react"
 import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView, Animated, Easing, RefreshControl } from "react-native"
 import { ScrollView } from "react-native-gesture-handler"
 import { router, useNavigation } from "expo-router"
@@ -293,12 +294,6 @@ export default function App() {
   React.useEffect(() => {
     loadData()
   }, [])
-
-  React.useEffect(() => {
-    Notifications.getAllScheduledNotificationsAsync().then((notifications) => {
-      console.log("Notificaciones pendientes:", notifications);
-    });
-  }, []);
 
   const placeholderData: string = `¿Qué sientes hoy? | Doctor | Especialidad`
 

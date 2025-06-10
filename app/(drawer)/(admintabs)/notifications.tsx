@@ -23,7 +23,7 @@ import * as Haptics from "expo-haptics"
 export default function SendNotifications() {
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
-  const [title, setTitle] = useState("Medical Cluster SLRC")
+  const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
   const [userTokens, setUserTokens] = useState<string[]>([])
   const [userCount, setUserCount] = useState(0)
@@ -166,6 +166,22 @@ export default function SendNotifications() {
               </View>
 
               <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Título de la notificación</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Ej: Nuevos Médicos Registrados"
+                  placeholderTextColor="#666"
+                  value={title}
+                  onChangeText={setTitle}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
+                  maxLength={40}
+                />
+                <Text style={styles.charCount}>{title.length}/40</Text>
+              </View>
+
+              <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Mensaje de la notificación</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
@@ -286,7 +302,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   inputGroup: {
-    marginBottom: 20,
   },
   inputLabel: {
     fontSize: 16,

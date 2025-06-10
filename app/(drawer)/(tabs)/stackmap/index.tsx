@@ -71,7 +71,7 @@ export default function DoctorMap() {
   let doctorIdParam = "i"
 
   if (route.params === undefined) {
-    console.log("No hay parametros")
+    // console.log("No hay parametros")
   } else {
     doctorIdParam = (route?.params as { doctorIdParam: string }).doctorIdParam
   }

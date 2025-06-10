@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 
@@ -115,7 +115,9 @@ export default function PreguntasFrecuentesScreen() {
           <Text style={styles.contactText}>
             Si tienes alguna pregunta adicional, no dudes en contactarnos directamente.
           </Text>
-          <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity style={styles.contactButton} onPress={() => {        
+            Linking.openURL(`mailto:contacto@medicalclusterslrc.com`);
+          }}>
             <MaterialCommunityIcons name="email" size={20} color="#ffffff" />
             <Text style={styles.contactButtonText}>Contactar</Text>
           </TouchableOpacity>

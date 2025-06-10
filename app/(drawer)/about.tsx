@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function SobreNosotrosScreen() {
@@ -149,7 +149,9 @@ export default function SobreNosotrosScreen() {
 
         <View style={styles.contactSection}>
           <Text style={styles.contactTitle}>¿Tienes alguna pregunta?</Text>
-          <TouchableOpacity style={styles.contactButton}>
+          <TouchableOpacity style={styles.contactButton} onPress={() => {        
+            Linking.openURL(`mailto:contacto@medicalclusterslrc.com`);
+          }}>
             <MaterialCommunityIcons name="email-outline" size={20} color="#ffffff" />
             <Text style={styles.contactButtonText}>Contáctanos</Text>
           </TouchableOpacity>

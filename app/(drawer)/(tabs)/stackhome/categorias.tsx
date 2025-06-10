@@ -31,7 +31,6 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const getSpecialties = async () => {
-    console.log('Fetching specialties...');
     const specialtiesRef = collection(db, "specialties");
     const q = query(specialtiesRef, orderBy("title"));
     const specialtiesData = await getDocs(q);

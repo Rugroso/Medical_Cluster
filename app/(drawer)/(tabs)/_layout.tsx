@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import React, { useState, useEffect, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
@@ -9,18 +9,21 @@ import { TabBarIcon } from '../../../components/navigation/TabBarIcon';
 import { db } from '../../../config/Firebase_Conf';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../../../context/AuthContext';
+import * as Network from 'expo-network';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
 function handleRegistrationError(errorMessage: string) {
-  alert(errorMessage);
-  throw new Error(errorMessage);
+  // alert(errorMessage);
+  // throw new Error(errorMessage);
 }
 
 async function registerForPushNotificationsAsync() {
@@ -41,7 +44,7 @@ async function registerForPushNotificationsAsync() {
       finalStatus = status;
     }
     if (finalStatus !== 'granted') {
-      handleRegistrationError('Permission not granted to get push token for push notification!');
+      // handleRegistrationError('Permission not granted to get push token for push notification!');
       return;
     }
 
@@ -49,7 +52,7 @@ async function registerForPushNotificationsAsync() {
       Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
 
     if (!projectId) {
-      handleRegistrationError('Project ID not found');
+      // handleRegistrationError('Project ID not found');
     }
 
     try {
@@ -58,10 +61,10 @@ async function registerForPushNotificationsAsync() {
       ).data;
       return pushTokenString;
     } catch (e: unknown) {
-      handleRegistrationError(`${e}`);
+      // handleRegistrationError(`${e}`);
     }
   } else {
-    handleRegistrationError('Must use physical device for push notifications');
+    // handleRegistrationError('Must use physical device for push notifications');
   }
 }
 
@@ -69,8 +72,23 @@ export default function TabLayout() {
   const { user } = useAuth();
   const [expoPushToken, setExpoPushToken] = useState('');
   const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined);
-  const notificationListener = useRef<Notifications.EventSubscription>();
-  const responseListener = useRef<Notifications.EventSubscription>();
+  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const responseListener = useRef<Notifications.EventSubscription | null>(null);
+
+  useEffect(() => {
+    const checkInternetConnection = async () => {
+      const networkState = await Network.getNetworkStateAsync();
+      if (!networkState.isConnected || !networkState.isInternetReachable) {
+        Alert.alert(
+          'Sin conexión a internet',
+          'Se necesita una conexión a internet para usar la aplicación.',
+          [{ text: 'OK' }]
+        );
+      }
+    };
+    checkInternetConnection();
+
+  }, []);
 
   useEffect(() => {
     registerForPushNotificationsAsync()

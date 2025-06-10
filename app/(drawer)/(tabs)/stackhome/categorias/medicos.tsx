@@ -109,10 +109,10 @@ export default function DoctorsScreen() {
             doctorId: docSnap.id,
           };
         });
-        console.log("Doctores encontrados:", doctorsData.length);
+        // console.log("Doctores encontrados:", doctorsData.length);
         return doctorsData;
       } else {
-        console.log("No se encontró ningún doctor.");
+        // console.log("No se encontró ningún doctor.");
         return [];
       }
     } catch (error) {
@@ -260,7 +260,7 @@ export default function DoctorsScreen() {
 
   const openDoctor = (doctorId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    console.log("Doctor ID:", doctorId);
+    // console.log("Doctor ID:", doctorId);
     router.push({
       pathname: "/(drawer)/(tabs)/stackhome/doctor",
       params: { doctorIdParam: doctorId },
@@ -570,7 +570,6 @@ const styles = StyleSheet.create({
   filtersContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
-    paddingHorizontal: 16,
     paddingTop: 12,
     backgroundColor: "#FFF",
   },
@@ -588,15 +587,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#F5F5F5",
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 24,
     paddingVertical: 8,
     justifyContent: "center",
     width: "47%",
   },
   filterButtonText: {
+    paddingHorizontal: 8,
     fontSize: 14,
     color: "#333",
-    marginHorizontal: 6,
+    marginHorizontal: 2,
   },
   optionsContainer: {
     backgroundColor: "#FFF",

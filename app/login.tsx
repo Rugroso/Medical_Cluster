@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Image} from "react-native";
+import { View, StyleSheet, Image, KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, Platform} from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "expo-router";
@@ -12,74 +12,78 @@ export default function LoginScreen() {
   const { login } = useAuth();
 
   return (
-    <View style={styles.container}>
-      <View>
-          <Image
-            source={require("../assets/images/logo/medicalclus.png")}
-            style={{ width: 80, height: 80, alignSelf: "center", marginBottom: 15 }}
-            resizeMode="contain"
-          />
-      </View>
-      <Text style={styles.title}>Bienvenido a Medical Cluster SLRC</Text>
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
+      <TouchableWithoutFeedback onPress={() => {Keyboard.dismiss();}}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}>
+        <View>
+            <Image
+              source={require("../assets/images/logo/medicalclus.png")}
+              style={{ width: 80, height: 80, alignSelf: "center", marginBottom: 15 }}
+              resizeMode="contain"
+            />
+        </View>
+        <Text style={styles.title}>Bienvenido a Medical Cluster SLRC</Text>
 
-      <TextInput
-        label="Correo Electrónico"
-        selectionColor="#4f0c2e"
-        underlineColor="#4f0c2e"
-        activeUnderlineColor="#4f0c2e"
-        activeOutlineColor="#4f0c2e"
-        outlineColor="#4f0c2e"
-        value={email}
-        onChangeText={setEmail}
-        mode="outlined"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoComplete="email"
-        style={styles.input}
-      />
+        <TextInput
+          label="Correo Electrónico"
+          selectionColor="#4f0c2e"
+          underlineColor="#4f0c2e"
+          activeUnderlineColor="#4f0c2e"
+          activeOutlineColor="#4f0c2e"
+          outlineColor="#4f0c2e"
+          value={email}
+          onChangeText={setEmail}
+          mode="outlined"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+          style={styles.input}
+        />
 
-      <TextInput
-        label="Contraseña"
-        selectionColor="#4f0c2e"
-        underlineColor="#4f0c2e"
-        activeUnderlineColor="#4f0c2e"
-        activeOutlineColor="#4f0c2e"
-        outlineColor="#4f0c2e"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        mode="outlined"
-        autoCapitalize="none"
-        autoComplete="password"
-        textContentType="password"
-        style={styles.input}
-      />
+        <TextInput
+          label="Contraseña"
+          selectionColor="#4f0c2e"
+          underlineColor="#4f0c2e"
+          activeUnderlineColor="#4f0c2e"
+          activeOutlineColor="#4f0c2e"
+          outlineColor="#4f0c2e"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          mode="outlined"
+          autoCapitalize="none"
+          autoComplete="password"
+          textContentType="password"
+          style={styles.input}
+        />
 
-      <Button mode="contained" onPress={() => {login(email, password)}} loading={loading} disabled={loading} style={styles.button}>
-        Iniciar Sesión
-      </Button>
+        <Button mode="contained" onPress={() => {login(email, password)}} loading={loading} disabled={loading} style={styles.button}>
+          Iniciar Sesión
+        </Button>
 
-      <Button mode="contained" icon="google" onPress={signInWithGoogle} style={styles.button}>
-        Iniciar sesión con Google
-      </Button>
+        <Button mode="contained" icon="google" onPress={signInWithGoogle} style={styles.button}>
+          Iniciar sesión con Google
+        </Button>
 
-      {/* <Button mode="contained" icon="facebook" onPress={signInWithFacebook} style={styles.button}>
-        Iniciar sesión con Facebook
-      </Button> */}
+        {/* <Button mode="contained" icon="facebook" onPress={signInWithFacebook} style={styles.button}>
+          Iniciar sesión con Facebook
+        </Button> */}
 
-      <Text style={styles.registerText}>
-        ¿No tienes cuenta?{" "}
-        <Text style={styles.registerLink} onPress={() => router.replace("/register")}>
-          Regístrate
+        <Text style={styles.registerText}>
+          ¿No tienes cuenta?{" "}
+          <Text style={styles.registerLink} onPress={() => router.replace("/register")}>
+            Regístrate
+          </Text>
         </Text>
-      </Text>
-      <Text style={styles.passwordText}>
-        ¿Olvidaste tu contraseña?{" "}
-        <Text style={styles.registerLink} onPress={() => router.replace("/reset-password")}>
-          Recupérala
+        <Text style={styles.passwordText}>
+          ¿Olvidaste tu contraseña?{" "}
+          <Text style={styles.registerLink} onPress={() => router.replace("/reset-password")}>
+            Recupérala
+          </Text>
         </Text>
-      </Text>
-    </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 

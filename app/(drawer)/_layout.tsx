@@ -17,8 +17,10 @@ const CustomDrawerButton = () => {
   const navigation = useNavigation();
 
   const openDrawer = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.dispatch(DrawerActions.openDrawer());
   };
+
   if (Platform.OS === "ios") {
     return (
       <TouchableOpacity 
